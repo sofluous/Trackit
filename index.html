@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Food Tracker</title>
+    <style>
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        body {
+            font-family: 'Inter', 'Helvetica Neue', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background: #005ecb;
+        }
+
+        input[type="date"] {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            appearance: none;
+            background-color: white;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            opacity: 1;
+        }
+
+        input[type="date"]:hover {
+            background-color: #f5f5f5;
+        }
+
+
+
+        #entries {
+            margin-top: 1rem;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-size: 1rem;
+        }
+
+        #calories {
+            font-weight: bold;
+            margin-top: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-buttons {
+            margin-top: 1rem;
+        }
+
+        .footer-buttons label {
+            font-size: 1rem;
+            color: #555;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        #jsonViewer {
+            font-family: monospace;
+
+            white-space: pre-wrap;
+            background: #272822;
+            color: #e0e0e0;
+
+            padding: 1rem;
+            border: none;
+            border-radius: 6px;
+            margin-top: 1rem;
+            display: none;
+            max-height: 300px;
+            overflow: auto;
+            font-size: 0.9rem;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+        }
+
+
+        .date-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            max-width: fill;
+            margin-inline: auto;
+        }
+
+        .date-controls {
+            display: flex;
+            justify-content: left;
+            gap: .4rem;
+            align-items: left;
+            margin-top: 2rem;
+        }
+
+        .date-controls button {
+            min-width: 100px;
+        }
+
+        .date-info {
+            text-align: left;
+            font-size: 2rem;
+        }
+
+        .today-note {
+            display: block;
+            font-size: 1rem;
+            color: #555;
+            margin-top: 0.2rem;
+            align-items: right;
+        }
+
+        .menu-bar {
+            display: flex;
+            background: #ffffff;
+            border-bottom: 1px solid #ccc;
+            font-family: sans-serif;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: .4rem;
+        }
+
+        .menu {
+            position: relative;
+        }
+
+        .menu-button {
+            font-weight: 600;
+            color: #333;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .menu-button:hover,
+        .menu-button:focus {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            padding: 0.5rem 0;
+            border: 1px solid #ddd;
+
+            border-radius: 4px;
+            margin-top: 0.2rem;
+            min-width: 160px;
+            z-index: 1001;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            text-align: left;
+            background: none;
+            border: none;
+            font-size: 0.95rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Hide the file input itself */
+        #importFile {
+            display: none;
+        }
+
+        .menu-toggle {
+            margin-left: 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .switch-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .switch-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .switch-label .slider {
+            width: 32px;
+            height: 16px;
+            background-color: #ccc;
+            border-radius: 16px;
+            position: relative;
+            transition: background-color 0.2s ease;
+        }
+
+        .switch-label .slider::before {
+            content: "";
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .switch-label input[type="checkbox"]:checked+.slider {
+            background-color: #007bff;
+        }
+
+        .switch-label input[type="checkbox"]:checked+.slider::before {
+            transform: translateX(16px);
+        }
+
+        .graph-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 2rem;
+        }
+
+        .graph-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .graph-controls button {
+            padding: 0.3rem 0.8rem;
+            font-size: 1rem;
+            margin: 0 0.3rem;
+        }
+    </style>
+</head>
+
+
+
+<body>
+    <nav class="menu-bar">
+        <div class="menu">
+            <button class="menu-button">File ▾</button>
+            <div class="dropdown">
+                <label for="importFile" class="dropdown-item">Import Data</label>
+                <input type="file" id="importFile" accept="application/json" onchange="importData(event)" />
+                <button class="dropdown-item" onclick="exportData()">Export Data</button>
+            </div>
+        </div>
+        <div class="menu-toggle">
+            <label class="switch-label">
+                <input type="checkbox" id="toggleGraphSwitch" onchange="toggleGraph()" />
+                <span class="slider"></span> Graph
+            </label>
+        </div>
+
+        <div class="menu-toggle">
+            <label class="switch-label">
+                <input type="checkbox" id="toggleJsonSwitch" onchange="toggleJsonViewer()" />
+                <span class="slider"></span> Raw JSON
+            </label>
+        </div>
+    </nav>
+    <div class="graph-card" id="graphCard" style="display: none;">
+        <div class="graph-header">
+            <strong>Calorie Trends</strong>
+            <div class="graph-controls">
+                <button onclick="adjustDays(-1)">−</button>
+                <span id="dayRangeLabel">7 Days</span>
+                <button onclick="adjustDays(1)">+</button>
+            </div>
+        </div>
+        <canvas id="calorieGraph" width="800" height="300"></canvas>
+        <div id="graphSummary" style="margin-top: 1rem; font-size: 0.9rem; color: #333; text-align: center;"></div>
+    </div>
+
+    <div class="content">
+        <div class="date-bar">
+            <div class="date-controls">
+                <button onclick="changeDate(-1)">Previous</button>
+                <input type="date" id="datePicker" onchange="setDateFromPicker(this.value)" />
+                <button onclick="changeDate(1)">Next</button>
+            </div>
+        </div>
+        <div id="entries">
+            <div class="date-display">Viewing: <span id="dateDisplay"></span></div>
+
+            <textarea id="foodInput" placeholder='[
+  { "item": "Orange Juice", "amount": "120ml", "brand": "Tropicana", "calories": 54 },
+  { "item": "Wrap", "amount": "2", "brand": "Casa Mendosa", "calories": 240 }
+]'></textarea>
+            <div id="calories">Estimated Calories: 0</div>
+            <div class="footer-buttons">
+            </div>
+            <div id="jsonViewer"></div>
+        </div>
+
+        <script>
+            const foodInput = document.getElementById('foodInput');
+            const caloriesDisplay = document.getElementById('calories');
+            const dateDisplay = document.getElementById('dateDisplay');
+            const datePicker = document.getElementById('datePicker');
+            const jsonViewer = document.getElementById('jsonViewer');
+
+            let currentDate = new Date();
+            let logData = JSON.parse(localStorage.getItem('foodLog') || '{}');
+
+            document.querySelector('.menu-button').addEventListener('click', () => {
+                const dropdown = document.querySelector('.dropdown');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown if clicked outside
+            window.addEventListener('click', (e) => {
+                const menu = document.querySelector('.menu');
+                if (!menu.contains(e.target)) {
+                    document.querySelector('.dropdown').style.display = 'none';
+                }
+            });
+
+
+            function formatDate(date) {
+                return date.toISOString().split('T')[0];
+            }
+
+            function updateDisplay() {
+                const key = formatDate(currentDate);
+                const today = formatDate(new Date());
+                dateDisplay.textContent = key;
+
+                datePicker.value = key;
+
+                foodInput.value = logData[key]?.entry || '';
+                caloriesDisplay.textContent = `Estimated Calories: ${logData[key]?.calories || 0}`;
+                updateJsonViewer();
+
+                // Sync toggle switch
+                const checkbox = document.getElementById('toggleJsonSwitch');
+                if (checkbox) checkbox.checked = jsonViewer.style.display === 'block';
+            }
+
+            function setDateFromPicker(value) {
+                currentDate = new Date(value);
+                updateDisplay();
+            }
+
+            function changeDate(days) {
+                const fallbackDate = currentDate || new Date();
+                const selectedDate = new Date(datePicker.value || formatDate(fallbackDate));
+                selectedDate.setDate(selectedDate.getDate() + days);
+                currentDate = selectedDate;
+                updateDisplay();
+            }
+
+            function saveCurrentEntry() {
+                const key = formatDate(currentDate);
+                const entry = foodInput.value;
+                const timestamp = new Date().toISOString();
+                let calories = 0;
+                try {
+                    const parsed = JSON.parse(entry);
+                    if (Array.isArray(parsed)) {
+                        calories = parsed.reduce((sum, item) => sum + (item.calories || 0), 0);
+                    }
+                } catch (e) {
+                    // Invalid JSON — calories set to 0
+                    calories = 0;
+                }
+                logData[key] = { entry, calories, timestamp };
+                localStorage.setItem('foodLog', JSON.stringify(logData));
+                caloriesDisplay.textContent = `Estimated Calories: ${calories}`;
+                updateJsonViewer();
+            }
+
+            function exportData() {
+                const blob = new Blob([JSON.stringify(logData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'food_log_backup.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        logData = imported;
+                        localStorage.setItem('foodLog', JSON.stringify(logData));
+                        updateDisplay();
+                    } catch (err) {
+                        alert('Invalid JSON file');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            function toggleGraph() {
+                const graphCard = document.getElementById("graphCard");
+                const checkbox = document.getElementById("toggleGraphSwitch");
+                graphCard.style.display = checkbox.checked ? "block" : "none";
+                if (checkbox.checked) drawCalorieGraph();
+            }
+
+            function toggleJsonViewer() {
+                const checkbox = document.getElementById('toggleJsonSwitch');
+                const visible = checkbox?.checked;
+
+                jsonViewer.style.display = visible ? 'block' : 'none';
+                updateJsonViewer();
+            }
+
+
+            function updateJsonViewer() {
+                jsonViewer.textContent = JSON.stringify(logData, null, 2);
+            }
+
+            let graphDays = 7;
+
+            function adjustDays(delta) {
+                graphDays = Math.max(1, graphDays + delta);
+                document.getElementById('dayRangeLabel').textContent = `${graphDays} Days`;
+                drawCalorieGraph();
+            }
+
+            function drawCalorieGraph() {
+                const canvas = document.getElementById("calorieGraph");
+                canvas.width = canvas.parentElement.offsetWidth;
+                canvas.height = 200;
+                const ctx = canvas.getContext("2d");
+                const width = canvas.width;
+                const height = canvas.height;
+
+                ctx.clearRect(0, 0, width, height);
+
+                const today = new Date();
+                const dates = [];
+
+                for (let i = graphDays - 1; i >= 0; i--) {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() - i);
+                    dates.push(d.toISOString().split("T")[0]);
+                }
+
+                const calories = dates.map(d => logData[d]?.calories || 0);
+                const maxCalories = Math.max(...calories, 2000); // Ensure some height
+
+                // Draw axes
+                ctx.strokeStyle = "#ccc";
+                ctx.beginPath();
+                ctx.moveTo(50, 10);
+                ctx.lineTo(50, height - 30);
+                ctx.lineTo(width - 20, height - 30);
+                ctx.stroke();
+
+                // Plot line
+                ctx.strokeStyle = "#007bff";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                calories.forEach((val, i) => {
+                    const x = 50 + i * ((width - 70) / (graphDays - 1));
+                    const y = height - 30 - (val / maxCalories) * (height - 50);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                const todayKey = formatDate(new Date());
+                const selectedKey = formatDate(currentDate);
+
+                dates.forEach((d, i) => {
+                    const x = 50 + i * ((canvas.width - 70) / (graphDays - 1));
+                    const y = canvas.height - 30 - (calories[i] / maxCalories) * (canvas.height - 50);
+
+                    // Mark today's point with solid blue dot
+                    if (d === todayKey) {
+                        ctx.fillStyle = "#007bff";
+                        ctx.beginPath();
+                        ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+
+                    // Outline selected date
+                    if (d === selectedKey) {
+                        ctx.strokeStyle = "#007bff";
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                        ctx.stroke();
+                    }
+                });
+
+                // Draw points
+                ctx.fillStyle = "#007bff";
+                calories.forEach((val, i) => {
+                    const x = 50 + i * ((width - 70) / (graphDays - 1));
+                    const y = height - 30 - (val / maxCalories) * (height - 50);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+
+                // Draw calorie labels
+                ctx.fillStyle = "#333";
+                ctx.font = "12px sans-serif";
+                calories.forEach((val, i) => {
+                    const x = 50 + i * ((width - 70) / (graphDays - 1));
+                    const y = height - 30 - (val / maxCalories) * (height - 50);
+                    ctx.fillText(val, x - 10, y - 8);
+                });
+
+                // Draw date labels
+                dates.forEach((d, i) => {
+                    const x = 50 + i * ((width - 70) / (graphDays - 1));
+                    ctx.fillText(d.slice(5), x - 15, height - 10);
+                });
+                
+                const max = Math.max(...calories);
+                const min = Math.min(...calories);
+                const avg = Math.round(calories.reduce((a, b) => a + b, 0) / calories.length);
+                document.getElementById("graphSummary").textContent =
+                    `Avg: ${avg} cal · Max: ${max} · Min: ${min}`;
+
+            }
+
+            foodInput.addEventListener('input', saveCurrentEntry);
+            updateDisplay();
+            if (document.getElementById('toggleGraphSwitch').checked) drawCalorieGraph();
+
+        </script>
+    </div>
+</body>
+
+</html>
