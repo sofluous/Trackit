@@ -8,6 +8,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Simple Food Tracker</title>
     <style>
+        :root {
+            --menu-height: 32px;
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+
+            /* Base */
+            --color-bg: #1d1e22;
+            --color-surface: #2a2c31;
+            --color-card: #2e2f36;
+            --color-border: #3a3b41;
+            --color-sidepanel: #512bc1;
+
+            /* Text */
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #aaaaaa;
+            --color-text-inverse: #000000;
+
+            /* Accent */
+            --color-primary: #00ff85;
+            /* Blue – selected/active */
+            --color-secondary: #4f8cff;
+            /* Green – highlights or positive status */
+
+            /* Buttons */
+            --color-btn-primary-bg: var(--color-primary);
+            --color-btn-primary-text: var(--color-text-inverse);
+            --color-btn-secondary-bg: #3a3d4d;
+            --color-btn-secondary-text: var(--color-text-primary);
+
+            /* States */
+            --color-today-marker: #2c89ff;
+            --color-selected-outline: #4f8cff;
+
+            /* Typography */
+            --font-base: 'Inter', sans-serif;
+
+            --color-graph-line: var(--color-primary);
+            --color-graph-point: var(--color-primary);
+            --color-graph-label: var(--color-text-secondary);
+            --color-graph-today: var(--color-primary);
+            --color-graph-selected-outline: var(--color-primary);
+        }
+
         header {
             display: flex;
             align-items: center;
@@ -16,45 +62,35 @@
         }
 
         body {
-            font-family: 'Inter', 'Helvetica Neue', sans-serif;
-            background: #f0f2f5;
+            background: var(--color-bg);
+            font-family: var(--font-base);
+            color: var(--color-text-primary);
             margin: 0;
-        }
+            overflow: hidden;
 
-        .content {
-            max-width: 800px;
-            margin: 2rem auto;
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
-
 
         button {
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            transition: background 0.2s;
-            padding: 0.5rem 1rem;
-            margin: 0 0.5rem;
             font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
         }
 
         button:hover {
-            background: #005ecb;
+            filter: brightness(1.1);
         }
 
-        input[type="date"] {
+        input[type="date"],
+        textarea {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            border-radius: 6px;
             padding: 0.5rem 1rem;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-            appearance: none;
-            background-color: white;
         }
+
 
         input[type="date"]::-webkit-calendar-picker-indicator {
             cursor: pointer;
@@ -67,20 +103,101 @@
             background-color: #f5f5f5;
         }
 
-
-
-        #entries {
-            margin-top: 1rem;
-            background: #fff;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        canvas {
+            width: 100%;
+            height: auto;
         }
 
         textarea {
             width: 100%;
             height: 200px;
             font-size: 1rem;
+        }
+
+        .content {
+            background: var(--color-surface);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .page {
+            display: flex;
+            height: 100vh;
+        }
+
+        .menu-bar {
+            display: flex;
+            height: var(--menu-height);
+
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+            font-family: sans-serif;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: .4rem;
+        }
+
+        .menu {
+            position: relative;
+        }
+
+        .menu-button {
+            font-weight: 600;
+            color: var(--color-btn-primary-text);
+            background: var(--color-btn-secondary-bg);
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .menu-button:hover,
+        .menu-button:focus {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--color-sidepanel);
+            padding: 1rem;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+            color: var(--color-text-primary);
+            overflow-y: auto;
+            position: sticky;
+            top: var(--menu-height);
+            height: calc(100vh - var(--menu-height));
+        }
+
+        .main {
+            flex: 1;
+            padding-top: calc(var(--menu-height) + 1rem);
+            padding: 2rem;
+            height: 100%;
+            overflow-y: auto;
+            background: var(--color-bg);
+        }
+
+        .button-primary {
+            background: var(--color-btn-primary-bg);
+            color: var(--color-btn-primary-text);
+        }
+
+        .button-secondary {
+            background: var(--color-btn-secondary-bg);
+            color: var(--color-btn-secondary-text);
+        }
+
+        #entries {
+            margin-top: 1rem;
+            background: var(--color-card);
+            color: var(--color-text-primary);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
 
         #calories {
@@ -102,31 +219,22 @@
 
         #jsonViewer {
             font-family: monospace;
-
             white-space: pre-wrap;
             background: #272822;
             color: #e0e0e0;
-
             padding: 1rem;
             border: none;
             border-radius: 6px;
             margin-top: 1rem;
-            display: none;
             max-height: 300px;
             overflow: auto;
             font-size: 0.9rem;
         }
 
-        canvas {
-            width: 100%;
-            height: auto;
-        }
-
-
         .date-bar {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: var(--space-sm);
             margin-bottom: 1rem;
             max-width: fill;
             margin-inline: auto;
@@ -157,36 +265,44 @@
             align-items: right;
         }
 
-        .menu-bar {
-            display: flex;
-            background: #ffffff;
-            border-bottom: 1px solid #ccc;
-            font-family: sans-serif;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: .4rem;
+        .card {
+            min-width: 320px;
+            max-width: 100%;
+            box-sizing: border-box;
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: var(--space-lg);
         }
 
-        .menu {
-            position: relative;
-        }
-
-        .menu-button {
+        .card-header {
             font-weight: 600;
-            color: #333;
-            background: none;
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
+            margin-bottom: var(--space-sm);
         }
 
-        .menu-button:hover,
-        .menu-button:focus {
-            background: #f0f0f0;
-            border-radius: 4px;
+        .card-footer {
+            margin-top: var(--space-md);
+            text-align: right;
         }
+
+        .card-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+
+        }
+
+        .card-row .card {
+            flex: 1 1 0;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
 
         .dropdown {
             display: none;
@@ -264,19 +380,11 @@
         }
 
         .switch-label input[type="checkbox"]:checked+.slider {
-            background-color: #007bff;
+            background-color: var(--color-primary);
         }
 
         .switch-label input[type="checkbox"]:checked+.slider::before {
             transform: translateX(16px);
-        }
-
-        .graph-card {
-            background: #fff;
-            border-radius: 8px;
-            padding: 1rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin: 2rem;
         }
 
         .graph-header {
@@ -290,6 +398,70 @@
             padding: 0.3rem 0.8rem;
             font-size: 1rem;
             margin: 0 0.3rem;
+        }
+
+        .calendar {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.4rem;
+            color: var(--color-text-primary);
+            font-size: 0.85rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--color-text-primary);
+        }
+
+        .calendar-header button {
+            background: none;
+            border: none;
+            color: var(--color-text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .calendar-header button:hover {
+            color: var(--color-primary);
+        }
+
+
+        .calendar-day {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+            position: relative;
+            background: transparent;
+        }
+
+        .calendar-day.today {
+            background: var(--color-today-marker);
+            color: white;
+        }
+
+        .calendar-day.selected {
+            border: 2px solid var(--color-selected-outline);
+        }
+
+        .calendar-day.has-entry::after {
+            content: "";
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--color-secondary);
         }
     </style>
 </head>
@@ -320,40 +492,67 @@
             </label>
         </div>
     </nav>
-    <div class="graph-card" id="graphCard" style="display: none;">
-        <div class="graph-header">
-            <strong>Calorie Trends</strong>
-            <div class="graph-controls">
-                <button onclick="adjustDays(-1)">−</button>
-                <span id="dayRangeLabel">7 Days</span>
-                <button onclick="adjustDays(1)">+</button>
-            </div>
-        </div>
-        <canvas id="calorieGraph" width="800" height="300"></canvas>
-        <div id="graphSummary" style="margin-top: 1rem; font-size: 0.9rem; color: #333; text-align: center;"></div>
-    </div>
-
-    <div class="content">
-        <div class="date-bar">
-            <div class="date-controls">
-                <button onclick="changeDate(-1)">Previous</button>
+    <div class="page">
+        <aside class="sidebar">
+            <div class="date-bar">
+                <div class="date-controls">
+                    <button onclick="changeDate(-1)">Previous</button>
+                    <button onclick="changeDate(1)">Next</button>
+                </div>
                 <input type="date" id="datePicker" onchange="setDateFromPicker(this.value)" />
-                <button onclick="changeDate(1)">Next</button>
             </div>
-        </div>
-        <div id="entries">
-            <div class="date-display">Viewing: <span id="dateDisplay"></span></div>
+            <div class="calendar-header">
+                <button onclick="changeCalendarMonth(-1)">‹</button>
+                <span id="calendarMonthLabel">July 2025</span>
+                <button onclick="changeCalendarMonth(1)">›</button>
+            </div>
+            <div class="calendar" id="calendarContainer"></div>
+        </aside>
 
-            <textarea id="foodInput" placeholder='[
+        <main class="main">
+            <div class="card" id="graphCard" style="display: none;">
+                <div class="card-header">
+                    <strong>Calorie Trends</strong>
+                    <div class="graph-controls">
+                        <button onclick="adjustDays(-1)">−</button>
+                        <span id="dayRangeLabel">7 Days</span>
+                        <button onclick="adjustDays(1)">+</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="calorieGraph" width="800" height="300"></canvas>
+                    <div id="graphSummary"
+                        style="margin-top: 1rem; font-size: 0.9rem; color: #333; text-align: center;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-row">
+                <div class="card" id="entries">
+                    <div class="card-header">
+                        <h3>Food Entry</h3>
+                        <div class="date-display" <span id="dateDisplay"></span></div>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="foodInput" placeholder='[
   { "item": "Orange Juice", "amount": "120ml", "brand": "Tropicana", "calories": 54 },
   { "item": "Wrap", "amount": "2", "brand": "Casa Mendosa", "calories": 240 }
 ]'></textarea>
-            <div id="calories">Estimated Calories: 0</div>
-            <div class="footer-buttons">
-            </div>
-            <div id="jsonViewer"></div>
-        </div>
+                        <div id="calories">Estimated Calories: 0</div>
+                    </div>
 
+                    <div class="footer-buttons"></div>
+                </div>
+                <div class="card" id="jsonViewerCard" style="display:none;">
+                    <div class="card-header">
+                        <h3>Raw JSON</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="jsonViewer"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
         <script>
             const foodInput = document.getElementById('foodInput');
             const caloriesDisplay = document.getElementById('calories');
@@ -377,12 +576,16 @@
                 }
             });
 
+            function getCssVar(name) {
+                return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+            }
 
             function formatDate(date) {
                 return date.toISOString().split('T')[0];
             }
 
             function updateDisplay() {
+
                 const key = formatDate(currentDate);
                 const today = formatDate(new Date());
                 dateDisplay.textContent = key;
@@ -409,6 +612,8 @@
                 selectedDate.setDate(selectedDate.getDate() + days);
                 currentDate = selectedDate;
                 updateDisplay();
+                renderCalendar();
+
             }
 
             function saveCurrentEntry() {
@@ -451,9 +656,12 @@
                         logData = imported;
                         localStorage.setItem('foodLog', JSON.stringify(logData));
                         updateDisplay();
-                    } catch (err) {
+                    }
+                    catch (err) {
                         alert('Invalid JSON file');
                     }
+                    renderCalendar();
+
                 };
                 reader.readAsText(file);
             }
@@ -469,7 +677,7 @@
                 const checkbox = document.getElementById('toggleJsonSwitch');
                 const visible = checkbox?.checked;
 
-                jsonViewer.style.display = visible ? 'block' : 'none';
+                document.getElementById("jsonViewerCard").style.display = visible ? "block" : "none";
                 updateJsonViewer();
             }
 
@@ -509,7 +717,7 @@
                 const maxCalories = Math.max(...calories, 2000); // Ensure some height
 
                 // Draw axes
-                ctx.strokeStyle = "#ccc";
+                ctx.strokeStyle = getCssVar('--color-graph-label');
                 ctx.beginPath();
                 ctx.moveTo(50, 10);
                 ctx.lineTo(50, height - 30);
@@ -517,7 +725,7 @@
                 ctx.stroke();
 
                 // Plot line
-                ctx.strokeStyle = "#007bff";
+                ctx.strokeStyle = getCssVar('--color-graph-line');
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 calories.forEach((val, i) => {
@@ -537,7 +745,7 @@
 
                     // Mark today's point with solid blue dot
                     if (d === todayKey) {
-                        ctx.fillStyle = "#007bff";
+                        ctx.fillStyle = getCssVar('--color-graph-today');
                         ctx.beginPath();
                         ctx.arc(x, y, 5, 0, 2 * Math.PI);
                         ctx.fill();
@@ -545,8 +753,7 @@
 
                     // Outline selected date
                     if (d === selectedKey) {
-                        ctx.strokeStyle = "#007bff";
-                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = getCssVar('--color-graph-selected-outline'); ctx.lineWidth = 2;
                         ctx.beginPath();
                         ctx.arc(x, y, 6, 0, 2 * Math.PI);
                         ctx.stroke();
@@ -554,7 +761,7 @@
                 });
 
                 // Draw points
-                ctx.fillStyle = "#007bff";
+                ctx.fillStyle = getCssVar('--color-graph-point');
                 calories.forEach((val, i) => {
                     const x = 50 + i * ((width - 70) / (graphDays - 1));
                     const y = height - 30 - (val / maxCalories) * (height - 50);
@@ -564,7 +771,7 @@
                 });
 
                 // Draw calorie labels
-                ctx.fillStyle = "#333";
+                ctx.fillStyle = getCssVar('--color-graph-label');
                 ctx.font = "12px sans-serif";
                 calories.forEach((val, i) => {
                     const x = 50 + i * ((width - 70) / (graphDays - 1));
@@ -577,7 +784,7 @@
                     const x = 50 + i * ((width - 70) / (graphDays - 1));
                     ctx.fillText(d.slice(5), x - 15, height - 10);
                 });
-                
+
                 const max = Math.max(...calories);
                 const min = Math.min(...calories);
                 const avg = Math.round(calories.reduce((a, b) => a + b, 0) / calories.length);
@@ -585,9 +792,68 @@
                     `Avg: ${avg} cal · Max: ${max} · Min: ${min}`;
 
             }
+            function renderCalendar() {
+                const container = document.getElementById('calendarContainer');
+                const label = document.getElementById('calendarMonthLabel'); // <-- MISSING before
+                container.innerHTML = "";
+
+                const today = new Date();
+                const referenceDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + calendarOffset, 1);
+                const year = referenceDate.getFullYear();
+                const month = referenceDate.getMonth();
+                const monthName = referenceDate.toLocaleString('default', { month: 'long' });
+                label.textContent = `${monthName} ${year}`;
+                const start = new Date(year, month, 1);
+                const end = new Date(year, month + 1, 0);
+                const todayKey = formatDate(new Date());
+                const selectedKey = formatDate(currentDate);
+
+                const startDay = start.getDay(); // Day of the week (0–6)
+                const daysInMonth = end.getDate();
+
+                // Pad with blanks before first day
+                for (let i = 0; i < startDay; i++) {
+                    const blank = document.createElement('div');
+                    container.appendChild(blank);
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, month, day);
+                    const key = formatDate(date);
+                    const div = document.createElement('div');
+                    div.classList.add('calendar-day');
+                    div.textContent = day;
+
+                    if (key === todayKey) div.classList.add('today');
+                    if (key === selectedKey) div.classList.add('selected');
+                    if (logData[key]) div.classList.add('has-entry');
+
+                    div.addEventListener('click', () => {
+                        currentDate = date;
+                        updateDisplay();
+                        renderCalendar(); // Re-render for updated selection
+                    });
+
+                    container.appendChild(div);
+                }
+            }
+            let calendarOffset = 0;
+
+            function changeCalendarMonth(offset) {
+                calendarOffset += offset;
+                renderCalendar();
+            }
 
             foodInput.addEventListener('input', saveCurrentEntry);
             updateDisplay();
+            renderCalendar();
+
+            window.addEventListener('resize', () => {
+                if (document.getElementById('toggleGraphSwitch').checked) {
+                    drawCalorieGraph();
+                }
+            });
+
             if (document.getElementById('toggleGraphSwitch').checked) drawCalorieGraph();
 
         </script>
