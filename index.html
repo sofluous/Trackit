@@ -342,15 +342,59 @@
             z-index: 3;
         }
 
+        .calendar-year-header button,
+        .calendar-month-header button {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            padding: 0.25rem;
+            color: var(--color-text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            line-height: 1;
+        }
+
+        .calendar-year-header button:hover,
+        .calendar-month-header button:hover {
+            color: var(--color-primary);
+        }
+        
+
         .calendar-compass-dot {
-            content: "";
             display: inline-block;
             width: 8px;
             height: 8px;
-            margin-left: 1rem;
             background-color: var(--color-highlight-green);
             border-radius: 50%;
-            vertical-align: middle;
+            margin-inline: 0.3rem;
+            /* Hide by default */
+        }
+
+        /* Position the dot on inside edge of each direction */
+        #yearBackBtn .calendar-compass-dot {
+            right: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #yearForwardBtn .calendar-compass-dot {
+            left: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #monthBackBtn .calendar-compass-dot {
+            right: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #monthForwardBtn .calendar-compass-dot {
+            left: -2px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .date-controls button {
@@ -534,14 +578,20 @@
     <div class="page">
         <aside class="sidebar">
             <div class="calendar-year-header">
-                <button id="yearBackBtn" onclick="changeCalendarYear(-1)"><span>‹</span></button>
-                <span id="calendarYearLabel">2025</span>
-                <button id="yearForwardBtn" onclick="changeCalendarYear(1)"><span>›</span></button>
+                <button id="yearBackBtn" onclick="changeCalendarYear(-1)">
+                    <span class="arrow">‹<span class="calendar-compass-dot"></span></span>
+                </button> <span id="calendarYearLabel">2025</span>
+                <button id="yearForwardBtn" onclick="changeCalendarYear(+1)">
+                    <span class="arrow">›<span class="calendar-compass-dot"></span></span>
+                </button>
             </div>
             <div class="calendar-month-header">
-                <button id="monthBackBtn" onclick="changeCalendarMonth(-1)"><span>‹</span></button>
-                <span id="calendarMonthLabel">July</span>
-                <button id="monthForwardBtn" onclick="changeCalendarMonth(1)"><span>›</span></button>
+                <button id="monthBackBtn" onclick="changeCalendarMonth(-1)">
+                    <span class="arrow">‹<span class="calendar-compass-dot"></span></span>
+                </button> <span id="calendarMonthLabel">July</span>
+                <button id="monthForwardBtn" onclick="changeCalendarMonth(+1)">
+                    <span class="arrow">›<span class="calendar-compass-dot"></span></span>
+                </button>
             </div>
             <div class="calendar" id="calendarContainer"></div>
             <div class="date-bar">
@@ -662,6 +712,14 @@
                 viewedDate = new Date(currentDate);
                 updateDisplay();
                 renderCalendar();
+                updateCompassIndicators();
+            }
+
+            function goToToday() {
+                currentDate = new Date();
+                viewedDate = new Date();
+                renderCalendar();
+                updateDisplay();
                 updateCompassIndicators();
             }
 
@@ -868,8 +926,6 @@
                 const startDay = start.getDay(); // Day of the week (0–6)
                 const daysInMonth = end.getDate();
 
-
-
                 // Pad with blanks before first day
                 for (let i = 0; i < startDay; i++) {
                     const blank = document.createElement('div');
@@ -902,39 +958,38 @@
 
             }
             function updateCompassIndicators() {
-                const yearBack = document.getElementById("yearBackBtn").querySelector("span");
-                const yearForward = document.getElementById("yearForwardBtn").querySelector("span");
-                const monthBack = document.getElementById("monthBackBtn").querySelector("span");
-                const monthForward = document.getElementById("monthForwardBtn").querySelector("span");
-
-                const viewDate = new Date(currentDate.getFullYear(), currentDate.getMonth());
-                const selected = new Date(formatDate(currentDate));
-                const selectedKey = formatDate(currentDate);
+                const selected = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
                 const viewedYear = parseInt(document.getElementById("calendarYearLabel").textContent);
-                const viewedMonth = new Date(`${viewedYear}-${document.getElementById("calendarMonthLabel").textContent}-01`);
+                const viewedMonthName = document.getElementById("calendarMonthLabel").textContent;
+                const viewedMonthIndex = new Date(`${viewedMonthName} 1, ${viewedYear}`).getMonth();
 
-                // Clear all indicators
-                [yearBack, yearForward, monthBack, monthForward].forEach(span => {
-                    const dot = span.querySelector(".calendar-compass-dot");
-                    if (dot) span.removeChild(dot);
+                const selectedYear = selected.getFullYear();
+                const selectedMonth = selected.getMonth();
+
+                // Get all compass dot spans
+                const yearBackDot = document.querySelector("#yearBackBtn .calendar-compass-dot");
+                const yearForwardDot = document.querySelector("#yearForwardBtn .calendar-compass-dot");
+                const monthBackDot = document.querySelector("#monthBackBtn .calendar-compass-dot");
+                const monthForwardDot = document.querySelector("#monthForwardBtn .calendar-compass-dot");
+
+                // Reset all
+                [yearBackDot, yearForwardDot, monthBackDot, monthForwardDot].forEach(dot => {
+                    dot.style.visibility = "hidden";
                 });
 
-                // Compare year
-                const selectedYear = selected.getFullYear();
+                // Year indicators
                 if (selectedYear < viewedYear) {
-                    yearBack.appendChild(createDot());
+                    yearBackDot.style.visibility = "visible";
                 } else if (selectedYear > viewedYear) {
-                    yearForward.appendChild(createDot());
+                    yearForwardDot.style.visibility = "visible";
                 }
 
-                // Compare month only if year matches
+                // Month indicators (only when year matches)
                 if (selectedYear === viewedYear) {
-                    const selectedMonth = selected.getMonth();
-                    const viewedMonthIndex = viewedMonth.getMonth();
                     if (selectedMonth < viewedMonthIndex) {
-                        monthBack.appendChild(createDot());
+                        monthBackDot.style.visibility = "visible";
                     } else if (selectedMonth > viewedMonthIndex) {
-                        monthForward.appendChild(createDot());
+                        monthForwardDot.style.visibility = "visible";
                     }
                 }
             }
@@ -943,14 +998,6 @@
                 const dot = document.createElement("span");
                 dot.classList.add("calendar-compass-dot");
                 return dot;
-            }
-
-            function goToToday() {
-                currentDate = new Date();
-                viewedDate = new Date();
-                renderCalendar();
-                updateDisplay();
-                updateCompassIndicators();
             }
 
             foodInput.addEventListener('input', saveCurrentEntry);
