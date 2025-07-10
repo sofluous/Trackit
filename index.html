@@ -28,10 +28,18 @@
             --color-text-secondary: #aaaaaa;
             --color-text-inverse: #000000;
 
+            --text-size-sm: 0.875rem;
+            --text-size-md: 1rem;
+            --text-size-lg: 1.25rem;
+            --text-size-xl: 1.5rem;
+            --text-weight-regular: 400;
+            --text-weight-bold: 600;
+
+
             /* Accent */
-            --color-primary: #00ff85;
+            --color-primary: #a6e22e;
             /* Blue – selected/active */
-            --color-secondary: #4f8cff;
+            --color-secondary: #66d9ef;
             /* Green – highlights or positive status */
 
             /* Buttons */
@@ -46,6 +54,12 @@
 
             /* Typography */
             --font-base: 'Inter', sans-serif;
+
+            --color-highlight-green: #8ee38e;
+            --color-highlight-blue: #7f9bff;
+            --color-day-card-fill: var(--color-card);
+            /* grey fill */
+
 
             --color-graph-line: var(--color-primary);
             --color-graph-point: var(--color-primary);
@@ -242,18 +256,109 @@
 
         .date-controls {
             display: flex;
-            justify-content: left;
+            justify-content: center;
             gap: .4rem;
-            align-items: left;
+            align-items: center;
             margin-top: 2rem;
         }
 
+        .calendar {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.4rem;
+            color: var(--color-text-primary);
+            font-size: 1rem;
+        }
+
+        .calendar-year-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+
+
+        .calendar-month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 2rem;
+            color: var(--color-text-primary);
+        }
+
+        .calendar-header button {
+            background: none;
+            border: none;
+            color: var(--color-text-primary);
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .calendar-header button:hover {
+            color: var(--color-primary);
+        }
+
+
+        .calendar-day {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 1px dashed var(--color-border);
+            background: transparent;
+        }
+
+        .calendar-day.has-entry {
+            background: var(--color-day-card-fill);
+            border: none;
+        }
+
+        .calendar-day.today::after {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            position: relative;
+            background-color: var(--color-highlight-green);
+            bottom: 6px;
+            z-index: 2;
+        }
+
+        .calendar-day.selected {
+            background: var(--color-highlight-green);
+            border: none;
+            color: var(--color-text-inverse);
+            z-index: 3;
+        }
+
+        .calendar-compass-dot {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-left: 1rem;
+            background-color: var(--color-highlight-green);
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+
         .date-controls button {
-            min-width: 100px;
+            min-width: 80px;
         }
 
         .date-info {
-            text-align: left;
+            text-align: center;
             font-size: 2rem;
         }
 
@@ -325,7 +430,7 @@
             text-align: left;
             background: none;
             border: none;
-            font-size: 0.95rem;
+            font-size: 1rem;
             cursor: pointer;
             white-space: nowrap;
         }
@@ -349,7 +454,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.9rem;
+            font-size: 1rem;
             cursor: pointer;
             user-select: none;
         }
@@ -399,74 +504,8 @@
             font-size: 1rem;
             margin: 0 0.3rem;
         }
-
-        .calendar {
-            margin-top: 1rem;
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.4rem;
-            color: var(--color-text-primary);
-            font-size: 0.85rem;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--color-text-primary);
-        }
-
-        .calendar-header button {
-            background: none;
-            border: none;
-            color: var(--color-text-primary);
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-        }
-
-        .calendar-header button:hover {
-            color: var(--color-primary);
-        }
-
-
-        .calendar-day {
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border-radius: 4px;
-            position: relative;
-            background: transparent;
-        }
-
-        .calendar-day.today {
-            background: var(--color-today-marker);
-            color: white;
-        }
-
-        .calendar-day.selected {
-            border: 2px solid var(--color-selected-outline);
-        }
-
-        .calendar-day.has-entry::after {
-            content: "";
-            position: absolute;
-            bottom: 4px;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: var(--color-secondary);
-        }
     </style>
 </head>
-
-
 
 <body>
     <nav class="menu-bar">
@@ -494,19 +533,25 @@
     </nav>
     <div class="page">
         <aside class="sidebar">
+            <div class="calendar-year-header">
+                <button id="yearBackBtn" onclick="changeCalendarYear(-1)"><span>‹</span></button>
+                <span id="calendarYearLabel">2025</span>
+                <button id="yearForwardBtn" onclick="changeCalendarYear(1)"><span>›</span></button>
+            </div>
+            <div class="calendar-month-header">
+                <button id="monthBackBtn" onclick="changeCalendarMonth(-1)"><span>‹</span></button>
+                <span id="calendarMonthLabel">July</span>
+                <button id="monthForwardBtn" onclick="changeCalendarMonth(1)"><span>›</span></button>
+            </div>
+            <div class="calendar" id="calendarContainer"></div>
             <div class="date-bar">
                 <div class="date-controls">
                     <button onclick="changeDate(-1)">Previous</button>
+                    <button id="todayButton" onclick="goToToday()">Today</button>
+
                     <button onclick="changeDate(1)">Next</button>
                 </div>
-                <input type="date" id="datePicker" onchange="setDateFromPicker(this.value)" />
             </div>
-            <div class="calendar-header">
-                <button onclick="changeCalendarMonth(-1)">‹</button>
-                <span id="calendarMonthLabel">July 2025</span>
-                <button onclick="changeCalendarMonth(1)">›</button>
-            </div>
-            <div class="calendar" id="calendarContainer"></div>
         </aside>
 
         <main class="main">
@@ -557,10 +602,10 @@
             const foodInput = document.getElementById('foodInput');
             const caloriesDisplay = document.getElementById('calories');
             const dateDisplay = document.getElementById('dateDisplay');
-            const datePicker = document.getElementById('datePicker');
             const jsonViewer = document.getElementById('jsonViewer');
 
             let currentDate = new Date();
+            let viewedDate = new Date(currentDate); // initially matches selected
             let logData = JSON.parse(localStorage.getItem('foodLog') || '{}');
 
             document.querySelector('.menu-button').addEventListener('click', () => {
@@ -590,8 +635,6 @@
                 const today = formatDate(new Date());
                 dateDisplay.textContent = key;
 
-                datePicker.value = key;
-
                 foodInput.value = logData[key]?.entry || '';
                 caloriesDisplay.textContent = `Estimated Calories: ${logData[key]?.calories || 0}`;
                 updateJsonViewer();
@@ -601,19 +644,25 @@
                 if (checkbox) checkbox.checked = jsonViewer.style.display === 'block';
             }
 
-            function setDateFromPicker(value) {
-                currentDate = new Date(value);
-                updateDisplay();
+            function changeCalendarYear(offset) {
+                viewedDate.setFullYear(viewedDate.getFullYear() + offset);
+                renderCalendar();
+                updateCompassIndicators();
             }
 
+            function changeCalendarMonth(offset) {
+                viewedDate.setMonth(viewedDate.getMonth() + offset);
+                renderCalendar();
+                updateCompassIndicators();
+            }
+
+
             function changeDate(days) {
-                const fallbackDate = currentDate || new Date();
-                const selectedDate = new Date(datePicker.value || formatDate(fallbackDate));
-                selectedDate.setDate(selectedDate.getDate() + days);
-                currentDate = selectedDate;
+                currentDate.setDate(currentDate.getDate() + days);
+                viewedDate = new Date(currentDate);
                 updateDisplay();
                 renderCalendar();
-
+                updateCompassIndicators();
             }
 
             function saveCurrentEntry() {
@@ -794,15 +843,23 @@
             }
             function renderCalendar() {
                 const container = document.getElementById('calendarContainer');
-                const label = document.getElementById('calendarMonthLabel'); // <-- MISSING before
+                const monthLabel = document.getElementById('calendarMonthLabel');
+                const yearLabel = document.getElementById('calendarYearLabel');
                 container.innerHTML = "";
 
                 const today = new Date();
-                const referenceDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + calendarOffset, 1);
+
+                const referenceDate = new Date();
+                referenceDate.setFullYear(viewedDate.getFullYear());
+                referenceDate.setMonth(viewedDate.getMonth());
+                referenceDate.setDate(1);
                 const year = referenceDate.getFullYear();
                 const month = referenceDate.getMonth();
                 const monthName = referenceDate.toLocaleString('default', { month: 'long' });
-                label.textContent = `${monthName} ${year}`;
+
+                monthLabel.textContent = monthName;
+                yearLabel.textContent = year;
+
                 const start = new Date(year, month, 1);
                 const end = new Date(year, month + 1, 0);
                 const todayKey = formatDate(new Date());
@@ -810,6 +867,8 @@
 
                 const startDay = start.getDay(); // Day of the week (0–6)
                 const daysInMonth = end.getDate();
+
+
 
                 // Pad with blanks before first day
                 for (let i = 0; i < startDay; i++) {
@@ -836,12 +895,62 @@
 
                     container.appendChild(div);
                 }
-            }
-            let calendarOffset = 0;
+                const todayBtn = document.getElementById('todayButton');
+                const isToday = formatDate(currentDate) === formatDate(new Date());
+                todayBtn.disabled = isToday;
+                updateCompassIndicators();
 
-            function changeCalendarMonth(offset) {
-                calendarOffset += offset;
+            }
+            function updateCompassIndicators() {
+                const yearBack = document.getElementById("yearBackBtn").querySelector("span");
+                const yearForward = document.getElementById("yearForwardBtn").querySelector("span");
+                const monthBack = document.getElementById("monthBackBtn").querySelector("span");
+                const monthForward = document.getElementById("monthForwardBtn").querySelector("span");
+
+                const viewDate = new Date(currentDate.getFullYear(), currentDate.getMonth());
+                const selected = new Date(formatDate(currentDate));
+                const selectedKey = formatDate(currentDate);
+                const viewedYear = parseInt(document.getElementById("calendarYearLabel").textContent);
+                const viewedMonth = new Date(`${viewedYear}-${document.getElementById("calendarMonthLabel").textContent}-01`);
+
+                // Clear all indicators
+                [yearBack, yearForward, monthBack, monthForward].forEach(span => {
+                    const dot = span.querySelector(".calendar-compass-dot");
+                    if (dot) span.removeChild(dot);
+                });
+
+                // Compare year
+                const selectedYear = selected.getFullYear();
+                if (selectedYear < viewedYear) {
+                    yearBack.appendChild(createDot());
+                } else if (selectedYear > viewedYear) {
+                    yearForward.appendChild(createDot());
+                }
+
+                // Compare month only if year matches
+                if (selectedYear === viewedYear) {
+                    const selectedMonth = selected.getMonth();
+                    const viewedMonthIndex = viewedMonth.getMonth();
+                    if (selectedMonth < viewedMonthIndex) {
+                        monthBack.appendChild(createDot());
+                    } else if (selectedMonth > viewedMonthIndex) {
+                        monthForward.appendChild(createDot());
+                    }
+                }
+            }
+
+            function createDot() {
+                const dot = document.createElement("span");
+                dot.classList.add("calendar-compass-dot");
+                return dot;
+            }
+
+            function goToToday() {
+                currentDate = new Date();
+                viewedDate = new Date();
                 renderCalendar();
+                updateDisplay();
+                updateCompassIndicators();
             }
 
             foodInput.addEventListener('input', saveCurrentEntry);
