@@ -27,11 +27,10 @@
             --color-text-primary: #ffffff;
             --color-text-secondary: #aaaaaa;
             --color-text-inverse: #000000;
-
             --text-size-sm: 0.875rem;
             --text-size-md: 1rem;
-            --text-size-lg: 1.25rem;
-            --text-size-xl: 1.5rem;
+            --text-size-lg: 2rem;
+            --text-size-xl: 3rem;
             --text-weight-regular: 400;
             --text-weight-bold: 600;
 
@@ -60,7 +59,6 @@
             --color-day-card-fill: var(--color-card);
             /* grey fill */
 
-
             --color-graph-line: var(--color-primary);
             --color-graph-point: var(--color-primary);
             --color-graph-label: var(--color-text-secondary);
@@ -85,8 +83,8 @@
         }
 
         button {
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
+            font-size: var(--text-size-md);
+            padding: var(--space-sm) var(--space-md);
             border-radius: 6px;
             border: none;
             cursor: pointer;
@@ -102,19 +100,7 @@
             border: 1px solid var(--color-border);
             color: var(--color-text-primary);
             border-radius: 6px;
-            padding: 0.5rem 1rem;
-        }
-
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-            padding: 0;
-            margin: 0;
-            opacity: 1;
-        }
-
-        input[type="date"]:hover {
-            background-color: #f5f5f5;
+            padding: var(--space-sm);
         }
 
         canvas {
@@ -125,13 +111,13 @@
         textarea {
             width: 100%;
             height: 200px;
-            font-size: 1rem;
+            font-size: var(--text-size-md);
         }
 
         .content {
             background: var(--color-surface);
             border-radius: 10px;
-            padding: 2rem;
+            padding: var(--space-md);
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
         }
 
@@ -143,7 +129,6 @@
         .menu-bar {
             display: flex;
             height: var(--menu-height);
-
             background: var(--color-surface);
             border-bottom: 1px solid var(--color-border);
             color: var(--color-text-secondary);
@@ -151,7 +136,8 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            padding: .4rem;
+            padding: var(--space-sm);
+            gap: var(--space-md);
         }
 
         .menu {
@@ -163,9 +149,9 @@
             color: var(--color-btn-primary-text);
             background: var(--color-btn-secondary-bg);
             border: none;
-            font-size: 1rem;
+            font-size: var(--text-size-md);
             cursor: pointer;
-            padding: 0.25rem 0.5rem;
+            padding: var(--space-xs) var(--space-sm);
         }
 
         .menu-button:hover,
@@ -188,8 +174,8 @@
 
         .main {
             flex: 1;
-            padding-top: calc(var(--menu-height) + 1rem);
-            padding: 2rem;
+            padding-top: calc(var(--menu-height) + var(--space-md));
+            padding: var(--space-lg);
             height: 100%;
             overflow-y: auto;
             background: var(--color-bg);
@@ -205,30 +191,102 @@
             color: var(--color-btn-secondary-text);
         }
 
+        .card {
+            min-width: 320px;
+            max-width: 100%;
+            box-sizing: border-box;
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: var(--space-md);
+        }
+
+        .card-header {
+            font-size: var(--text-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+
+        .card-footer {
+            text-align: right;
+            margin-bottom: var(--space-sm);
+        }
+
+        .card-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: var(--space-sm);
+            align-items: flex-start;
+
+        }
+
+        .card-row .card {
+            flex: 1 1 0;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            padding: var(--space-sm) 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: var(--space-xs);
+            min-width: 160px;
+            z-index: 1001;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: var(--space-sm) 1rem;
+            text-align: left;
+            background: none;
+            border: none;
+            font-size: var(--text-size-md);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+
         #entries {
-            margin-top: 1rem;
             background: var(--color-card);
             color: var(--color-text-primary);
-            padding: 1rem;
             border-radius: 8px;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
 
+        .date-display {
+            color: var(--color-highlight-green);
+            font-size: medium;
+            margin-bottom: var(--space-md);
+        }
+
         #calories {
             font-weight: bold;
-            margin-top: 1rem;
-            margin-bottom: 3rem;
+            margin-bottom: var(--space-sm);
         }
 
         .footer-buttons {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
         }
 
         .footer-buttons label {
-            font-size: 1rem;
+            font-size: var(--text-size-md);
             color: #555;
             display: block;
-            margin-top: 0.5rem;
+            margin-top: var(--space-sm);
         }
 
         #jsonViewer {
@@ -239,13 +297,13 @@
             padding: 1rem;
             border: none;
             border-radius: 6px;
-            margin-top: 1rem;
+            margin-bottom: var(--space-md);
             max-height: 300px;
             overflow: auto;
-            font-size: 0.9rem;
+            font-size: var(--space-md);
         }
 
-        .date-bar {
+        .calendar-controls-wrapper {
             display: flex;
             flex-direction: column;
             gap: var(--space-sm);
@@ -257,38 +315,30 @@
         .date-controls {
             display: flex;
             justify-content: center;
-            gap: .4rem;
+            gap: var(--space-sm);
             align-items: center;
-            margin-top: 2rem;
+            margin-top: var(--space-sm);
         }
 
         .calendar {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 0.4rem;
             color: var(--color-text-primary);
-            font-size: 1rem;
-        }
-
-        .calendar-year-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: var(--space-sm);
+            font-size: var(--text-size-md);
         }
 
 
+        .calendar-year-header,
         .calendar-month-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
+            margin-top: 0;
+            margin-bottom: var(--space-xs);
             font-weight: 600;
-            font-size: 2rem;
+            font-size: var(--text-size-lg);
             color: var(--color-text-primary);
         }
 
@@ -296,9 +346,9 @@
             background: none;
             border: none;
             color: var(--color-text-primary);
-            font-size: 2rem;
+            font-size: var(--text-size-lg);
             cursor: pointer;
-            padding: 0.25rem 0.5rem;
+            padding: var(--space-xs) var(--space-sm);
         }
 
         .calendar-header button:hover {
@@ -329,7 +379,7 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            position: relative;
+            position: bottom;
             background-color: var(--color-highlight-green);
             bottom: 6px;
             z-index: 2;
@@ -346,8 +396,8 @@
         .calendar-month-header button {
             background: none;
             border: none;
-            font-size: 2rem;
-            padding: 0.25rem;
+            font-size: var(--text-size-lg);
+            padding: var(--space-xs);
             color: var(--color-text-primary);
             display: flex;
             align-items: center;
@@ -360,7 +410,7 @@
         .calendar-month-header button:hover {
             color: var(--color-primary);
         }
-        
+
 
         .calendar-compass-dot {
             display: inline-block;
@@ -368,33 +418,10 @@
             height: 8px;
             background-color: var(--color-highlight-green);
             border-radius: 50%;
-            margin-inline: 0.3rem;
-            /* Hide by default */
-        }
-
-        /* Position the dot on inside edge of each direction */
-        #yearBackBtn .calendar-compass-dot {
-            right: -2px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        #yearForwardBtn .calendar-compass-dot {
-            left: -2px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        #monthBackBtn .calendar-compass-dot {
-            right: -2px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        #monthForwardBtn .calendar-compass-dot {
-            left: -2px;
-            top: 50%;
-            transform: translateY(-50%);
+            margin-left: 0.3rem;
+            margin-right: 0.3rem;
+            vertical-align: middle;
+            visibility: hidden;
         }
 
         .date-controls button {
@@ -403,85 +430,10 @@
 
         .date-info {
             text-align: center;
-            font-size: 2rem;
-        }
-
-        .today-note {
-            display: block;
-            font-size: 1rem;
-            color: #555;
-            margin-top: 0.2rem;
-            align-items: right;
-        }
-
-        .card {
-            min-width: 320px;
-            max-width: 100%;
-            box-sizing: border-box;
-            background: var(--color-card);
-            border-radius: 12px;
-            padding: var(--space-lg);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: var(--space-lg);
-        }
-
-        .card-header {
-            font-weight: 600;
-            margin-bottom: var(--space-sm);
-        }
-
-        .card-footer {
-            margin-top: var(--space-md);
-            text-align: right;
-        }
-
-        .card-row {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-            align-items: flex-start;
-
-        }
-
-        .card-row .card {
-            flex: 1 1 0;
-            min-width: 300px;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+            font-size: var(--text-size-lg);
         }
 
 
-        .dropdown {
-            display: none;
-            position: absolute;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-            padding: 0.5rem 0;
-            border: 1px solid #ddd;
-
-            border-radius: 4px;
-            margin-top: 0.2rem;
-            min-width: 160px;
-            z-index: 1001;
-        }
-
-        .dropdown-item {
-            display: block;
-            width: 100%;
-            padding: 0.5rem 1rem;
-            text-align: left;
-            background: none;
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f0f0f0;
-        }
 
         /* Hide the file input itself */
         #importFile {
@@ -489,7 +441,7 @@
         }
 
         .menu-toggle {
-            margin-left: 2rem;
+            margin-left: var(--space-sm);
             display: flex;
             align-items: center;
         }
@@ -497,8 +449,8 @@
         .switch-label {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 1rem;
+            gap: var(--space-sm);
+            font-size: var(--text-size-md);
             cursor: pointer;
             user-select: none;
         }
@@ -536,16 +488,9 @@
             transform: translateX(16px);
         }
 
-        .graph-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
         .graph-controls button {
             padding: 0.3rem 0.8rem;
-            font-size: 1rem;
+            font-size: var(--text-size-md);
             margin: 0 0.3rem;
         }
     </style>
@@ -579,26 +524,33 @@
         <aside class="sidebar">
             <div class="calendar-year-header">
                 <button id="yearBackBtn" onclick="changeCalendarYear(-1)">
-                    <span class="arrow">‹<span class="calendar-compass-dot"></span></span>
+                    <span class="arrow">
+                        <span class="calendar-compass-dot"></span>⟨
+                    </span>
                 </button> <span id="calendarYearLabel">2025</span>
                 <button id="yearForwardBtn" onclick="changeCalendarYear(+1)">
-                    <span class="arrow">›<span class="calendar-compass-dot"></span></span>
+                    <span class="arrow">
+                        ⟩<span class="calendar-compass-dot"></span>
+                    </span>
                 </button>
             </div>
             <div class="calendar-month-header">
                 <button id="monthBackBtn" onclick="changeCalendarMonth(-1)">
-                    <span class="arrow">‹<span class="calendar-compass-dot"></span></span>
+                    <span class="arrow">
+                        <span class="calendar-compass-dot"></span>⟨
+                    </span>
                 </button> <span id="calendarMonthLabel">July</span>
                 <button id="monthForwardBtn" onclick="changeCalendarMonth(+1)">
-                    <span class="arrow">›<span class="calendar-compass-dot"></span></span>
+                    <span class="arrow">
+                        ⟩<span class="calendar-compass-dot"></span>
+                    </span>
                 </button>
             </div>
             <div class="calendar" id="calendarContainer"></div>
-            <div class="date-bar">
+            <div class="calendar-controls-wrapper">
                 <div class="date-controls">
                     <button onclick="changeDate(-1)">Previous</button>
                     <button id="todayButton" onclick="goToToday()">Today</button>
-
                     <button onclick="changeDate(1)">Next</button>
                 </div>
             </div>
@@ -617,7 +569,7 @@
                 <div class="card-body">
                     <canvas id="calorieGraph" width="800" height="300"></canvas>
                     <div id="graphSummary"
-                        style="margin-top: 1rem; font-size: 0.9rem; color: #333; text-align: center;">
+                        style="margin-top: var(--space-md); font-size: var(--space-md); color: #333; text-align: center;">
                     </div>
                 </div>
             </div>
@@ -625,7 +577,7 @@
             <div class="card-row">
                 <div class="card" id="entries">
                     <div class="card-header">
-                        <h3>Food Entry</h3>
+                        <strong>Food Entry</strong>
                         <div class="date-display" <span id="dateDisplay"></span></div>
                     </div>
                     <div class="card-body">
@@ -635,12 +587,11 @@
 ]'></textarea>
                         <div id="calories">Estimated Calories: 0</div>
                     </div>
-
                     <div class="footer-buttons"></div>
                 </div>
                 <div class="card" id="jsonViewerCard" style="display:none;">
                     <div class="card-header">
-                        <h3>Raw JSON</h3>
+                        <strong>Raw JSON</strong>
                     </div>
                     <div class="card-body">
                         <div id="jsonViewer"></div>
