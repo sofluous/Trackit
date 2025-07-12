@@ -2,7 +2,6 @@
 <html lang="en">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -160,6 +159,35 @@
             border-radius: 4px;
         }
 
+        .dropdown {
+            display: none;
+            position: absolute;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            padding: var(--space-sm) 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: var(--space-xs);
+            min-width: 160px;
+            z-index: 1001;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: var(--space-sm) 1rem;
+            text-align: left;
+            background: none;
+            border: none;
+            font-size: var(--text-size-md);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+
         .sidebar {
             width: 260px;
             background: var(--color-sidepanel);
@@ -230,36 +258,6 @@
             height: 100%;
         }
 
-
-        .dropdown {
-            display: none;
-            position: absolute;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-            padding: var(--space-sm) 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-top: var(--space-xs);
-            min-width: 160px;
-            z-index: 1001;
-        }
-
-        .dropdown-item {
-            display: block;
-            width: 100%;
-            padding: var(--space-sm) 1rem;
-            text-align: left;
-            background: none;
-            border: none;
-            font-size: var(--text-size-md);
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f0f0f0;
-        }
-
         #entries {
             background: var(--color-card);
             color: var(--color-text-primary);
@@ -276,17 +274,6 @@
         #calories {
             font-weight: bold;
             margin-bottom: var(--space-sm);
-        }
-
-        .footer-buttons {
-            margin-top: var(--space-md);
-        }
-
-        .footer-buttons label {
-            font-size: var(--text-size-md);
-            color: #555;
-            display: block;
-            margin-top: var(--space-sm);
         }
 
         #jsonViewer {
@@ -320,13 +307,43 @@
             margin-top: var(--space-sm);
         }
 
-        .calendar {
-            margin-top: var(--space-md);
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.4rem;
+        .calendar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+            margin-bottom: var(--space-sm);
+        }
+
+        .calendar-nav-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: var(--text-size-lg);
+            font-weight: var(--text-weight-bold);
             color: var(--color-text-primary);
-            font-size: var(--text-size-md);
+        }
+
+        .calendar-nav-row button {
+            background: none;
+            border: none;
+            color: var(--color-text-primary);
+            font-size: var(--text-size-xl);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        .calendar-nav-row button:hover {
+            color: var(--color-primary);
+        }
+
+        .calendar-nav-row span {
+            flex-grow: 1;
+            text-align: center;
+            font-weight: 600;
+            font-size: var(--text-size-lg);
         }
 
 
@@ -346,7 +363,7 @@
             background: none;
             border: none;
             color: var(--color-text-primary);
-            font-size: var(--text-size-lg);
+            font-size: var(--text-size-sm);
             cursor: pointer;
             padding: var(--space-xs) var(--space-sm);
         }
@@ -355,23 +372,45 @@
             color: var(--color-primary);
         }
 
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: .1rem;
+            font-size: var(--text-size-sm);
+            text-align: center;
+            margin-top: 0.5rem;
+            margin-bottom: var(--space-md);
+            color: var(--color-text-primary);
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-auto-rows: 36px;
+            /* uniform row height */
+            gap: 0.1rem;
+            min-height: calc(36px * 6 + 1rem);
+            /* 6 rows max */
+        }
 
         .calendar-day {
             position: relative;
-            aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            aspect-ratio: 1 / 1;
+            height: 100%;
+            /* ensure full height */
             border-radius: 50%;
-            border: 1px dashed var(--color-border);
+            font-size: var(--text-size-md);
+            cursor: pointer;
             background: transparent;
+            border: 1px dashed var(--color-border);
+            box-sizing: border-box;
+            min-height: 36px;
+            /* ensure non-zero height for empty rows */
         }
 
-        .calendar-day.has-entry {
-            background: var(--color-day-card-fill);
-            border: none;
-        }
 
         .calendar-day.today::after {
             content: "";
@@ -379,31 +418,35 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            position: bottom;
             background-color: var(--color-highlight-green);
-            bottom: 6px;
-            z-index: 2;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .calendar-day.has-entry {
+            background: var(--color-day-card-fill);
+            color: var(--color-text-primary);
         }
 
         .calendar-day.selected {
             background: var(--color-highlight-green);
-            border: none;
             color: var(--color-text-inverse);
-            z-index: 3;
+            border: none;
+            z-index: 1;
         }
 
         .calendar-year-header button,
         .calendar-month-header button {
-            background: none;
-            border: none;
+            all: unset;
             font-size: var(--text-size-lg);
             padding: var(--space-xs);
             color: var(--color-text-primary);
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            line-height: 1;
+            cursor: pointer;
         }
 
         .calendar-year-header button:hover,
@@ -522,29 +565,35 @@
     </nav>
     <div class="page">
         <aside class="sidebar">
-            <div class="calendar-year-header">
-                <button id="yearBackBtn" onclick="changeCalendarYear(-1)">
-                    <span class="arrow">
-                        <span class="calendar-compass-dot"></span>⟨
-                    </span>
-                </button> <span id="calendarYearLabel">2025</span>
-                <button id="yearForwardBtn" onclick="changeCalendarYear(+1)">
-                    <span class="arrow">
-                        ⟩<span class="calendar-compass-dot"></span>
-                    </span>
-                </button>
+            <div class="calendar-nav">
+                <div class="calendar-nav-row calendar-year-row">
+                    <button id="yearBackBtn" onclick="changeCalendarYear(-1)">
+                        ⟨<span class="calendar-compass-dot"></span>
+                    </button>
+                    <span id="calendarYearLabel">2025</span>
+                    <button id="yearForwardBtn" onclick="changeCalendarYear(+1)">
+                        <span class="calendar-compass-dot"></span>⟩
+                    </button>
+                </div>
+
+                <div class="calendar-nav-row calendar-month-row">
+                    <button id="monthBackBtn" onclick="changeCalendarMonth(-1)">
+                        ⟨<span class="calendar-compass-dot"></span>
+                    </button>
+                    <span id="calendarMonthLabel">July</span>
+                    <button id="monthForwardBtn" onclick="changeCalendarMonth(+1)">
+                        <span class="calendar-compass-dot"></span>⟩
+                    </button>
+                </div>
             </div>
-            <div class="calendar-month-header">
-                <button id="monthBackBtn" onclick="changeCalendarMonth(-1)">
-                    <span class="arrow">
-                        <span class="calendar-compass-dot"></span>⟨
-                    </span>
-                </button> <span id="calendarMonthLabel">July</span>
-                <button id="monthForwardBtn" onclick="changeCalendarMonth(+1)">
-                    <span class="arrow">
-                        ⟩<span class="calendar-compass-dot"></span>
-                    </span>
-                </button>
+            <div class="calendar-weekdays">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
             </div>
             <div class="calendar" id="calendarContainer"></div>
             <div class="calendar-controls-wrapper">
@@ -560,16 +609,16 @@
             <div class="card" id="graphCard" style="display: none;">
                 <div class="card-header">
                     <strong>Calorie Trends</strong>
-                    <div class="graph-controls">
-                        <button onclick="adjustDays(-1)">−</button>
-                        <span id="dayRangeLabel">7 Days</span>
-                        <button onclick="adjustDays(1)">+</button>
-                    </div>
                 </div>
                 <div class="card-body">
                     <canvas id="calorieGraph" width="800" height="300"></canvas>
                     <div id="graphSummary"
                         style="margin-top: var(--space-md); font-size: var(--space-md); color: #333; text-align: center;">
+                    </div>
+                    <div class="graph-controls">
+                        <button onclick="adjustDays(-1)">−</button>
+                        <span id="dayRangeLabel">7 Days</span>
+                        <button onclick="adjustDays(1)">+</button>
                     </div>
                 </div>
             </div>
@@ -587,7 +636,6 @@
 ]'></textarea>
                         <div id="calories">Estimated Calories: 0</div>
                     </div>
-                    <div class="footer-buttons"></div>
                 </div>
                 <div class="card" id="jsonViewerCard" style="display:none;">
                     <div class="card-header">
@@ -794,7 +842,9 @@
                 });
                 ctx.stroke();
 
-                const todayKey = formatDate(new Date());
+                const now = new Date();
+                const localToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const todayKey = formatDate(localToday);
                 const selectedKey = formatDate(currentDate);
 
                 dates.forEach((d, i) => {
