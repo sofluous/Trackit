@@ -71,6 +71,10 @@
             --color-graph-selected-outline: var(--color-primary);
         }
 
+        html {
+            height: 100%;
+        }
+
         header {
             display: flex;
             align-items: center;
@@ -88,6 +92,7 @@
             font-family: var(--font-base);
             color: var(--color-text-primary);
             margin: 0;
+            height: 100%;
             overflow: hidden;
 
         }
@@ -104,8 +109,7 @@
             filter: brightness(1.1);
         }
 
-        input[type="date"],
-        textarea {
+        input[type="date"] {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             color: var(--color-text-primary);
@@ -115,32 +119,24 @@
 
         canvas {
             width: 100%;
-            height: auto;
-        }
-
-        textarea {
-            width: 100%;
-            max-width: 100%;
-            font-size: var(--text-size-md);
-            box-sizing: border-box;
-            height: auto;
-
-        }
-
-        .content {
-            background: var(--color-surface);
-            border-radius: var(--rad-md);
-            padding: var(--space-md) box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            height: 100%;
+            /* ✅ Instead of auto */
+            max-height: unset;
+            object-fit: contain;
+            flex: 1 1 auto;
+            /* ✅ Allow it to grow inside card-body */
         }
 
         .page {
             display: flex;
             flex-direction: row;
+            flex: 1 1 auto;
+            height: 100vh;
+            min-height: 0;
             height: calc(100vh - var(--menu-height));
             gap: var(--space-md);
             box-sizing: border-box;
             padding: var(--space-md);
-
         }
 
         .menu-bar {
@@ -156,7 +152,6 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-
             box-sizing: border-box;
         }
 
@@ -225,10 +220,11 @@
         }
 
         .main {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            height: 100%;
+
+            flex: 1 1 auto;
+            min-height: 0;
             overflow-y: auto;
             background: var(--color-bg);
             gap: var(--space-md);
@@ -244,23 +240,52 @@
             color: var(--color-btn-secondary-text);
         }
 
+        .card-row {
+            display: flex;
+            gap: var(--space-md);
+            flex: 1 1 0;
+            flex-direction: row;
+            align-items: stretch;
+            min-height: 0;
+            /* ✨ enable child shrinkage */
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 0;
+            min-height: 0;
+            height: 100%;
+            box-sizing: border-box;
+            background: var(--color-card);
+            border-radius: var(--rad-lg);
+            padding: var(--space-lg);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            gap: var(--rad-sm);
+            overflow: hidden;
+            /* ✅ Add this */
+
+        }
 
         .card-header {
             display: flex;
-            align-items: center;
+            flex-shrink: 0;
+            align-items: left;
             justify-content: space-between;
             font-size: var(--text-size-lg);
             font-weight: 600;
-            margin-bottom: var(--space-sm);
+            margin-bottom: var(--space-md);
             gap: var(--space-md);
         }
 
         .card-body {
-            flex: 1;
             display: flex;
+            flex: 1 1 auto;
+            min-height: 0;
             flex-direction: column;
+            margin-bottom: 0;
+            background: rgba(255, 0, 0, 0.1);
             gap: var(--space-md);
-            margin-bottom: var(--space-md);
         }
 
         .card-footer {
@@ -268,43 +293,19 @@
             margin-bottom: var(--space-sm);
         }
 
-        .card-row {
-            display: flex;
-            gap: var(--space-md);
-            flex: 1;
-            /* fills height of container */
-
-        }
-
-        .card {
-            flex: 1;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            min-width: 320px;
-            max-width: 100%;
-            box-sizing: border-box;
-            background: var(--color-card);
-            border-radius: var(--rad-lg);
-            padding: var(--space-lg);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            gap: var(--rad-sm);
-        }
-
         .card-body textarea {
-            flex: 1;
+            background: rgba(0, 255, 0, 0.1);
+            display: flex;
+            flex: 1 1 auto;
+            min-height: 0;
             resize: none;
-            width: 100%;
             box-sizing: border-box;
-            background: var(--color-surface);
             border: 1px solid var(--color-border);
             color: var(--color-text-primary);
-            padding: var(--space-sm);
             border-radius: var(--rad-sm);
+            padding: var(--space-sm);
             font-size: var(--text-size-md);
-            overflow: auto;
         }
-
 
         #entriesCard {
             background: var(--color-card);
@@ -324,6 +325,10 @@
         }
 
         #jsonViewer {
+            flex: 1 1 auto;
+            min-height: 0;
+            height: 100%;
+            overflow: auto;
             font-family: monospace;
             white-space: pre-wrap;
             background: #272822;
@@ -332,26 +337,26 @@
             border: none;
             border-radius: var(--rad-xs);
             margin-bottom: var(--space-md);
-            max-height: 300px;
-            overflow: auto;
             font-size: var(--space-md);
+        }
+
+        #graphSummary {
+            font-size: var(--space-md);
+            color: #333;
+            text-align: center;
         }
 
         .calendar-controls-wrapper {
             display: flex;
             flex-direction: column;
             gap: var(--space-sm);
-            margin-bottom: 1rem;
             max-width: fill;
-            margin-inline: auto;
         }
 
         .date-controls {
             display: flex;
-            justify-content: center;
+            justify-content: right;
             gap: var(--space-sm);
-            align-items: center;
-            margin-top: var(--space-sm);
         }
 
         .calendar-nav {
@@ -634,21 +639,21 @@
 
         <div class="menu-toggle">
             <label class="switch-label">
-                <input type="checkbox" id="toggleNutritionSwitch" data-toggle-target="nutritionCard" checked />
+                <input type="checkbox" id="toggleNutritionSwitch" data-toggle-target="nutritionCard" unchecked />
                 <span class="slider"></span> Nutrition
             </label>
         </div>
 
         <div class="menu-toggle">
             <label class="switch-label">
-                <input type="checkbox" id="toggleGraphSwitch" data-toggle-target="graphCard" checked />
+                <input type="checkbox" id="toggleGraphSwitch" data-toggle-target="graphCard" unchecked />
                 <span class="slider"></span> Graph
             </label>
         </div>
 
         <div class="menu-toggle">
             <label class="switch-label">
-                <input type="checkbox" id="toggleJsonSwitch" data-toggle-target="jsonViewerCard" checked />
+                <input type="checkbox" id="toggleJsonViewerSwitch" data-toggle-target="jsonViewerCard" unchecked />
                 <span class="slider"></span> Raw JSON
             </label>
         </div>
@@ -704,8 +709,8 @@
                         <strong>Food Entry</strong>
                         <div class="calendar-controls-wrapper">
                             <div class="date-controls">
-                                <button onclick="changeDate(-1)">Previous</button>
                                 <div class="date-display" <span id="dateDisplay"></span></div>
+                                <button onclick="changeDate(-1)">Previous</button>
                                 <button onclick="changeDate(1)">Next</button>
                             </div>
                         </div>
@@ -715,10 +720,12 @@
   { "item": "Orange Juice", "amount": "120ml", "brand": "Tropicana", "calories": 54 },
   { "item": "Wrap", "amount": "2", "brand": "Casa Mendosa", "calories": 240 }
 ]'></textarea>
+                    </div>
+                    <div class="card-footer">
                         <div id="calories">Estimated Calories: 0</div>
                     </div>
                 </div>
-                <div class="card" id="jsonViewerCard" style="display:none;">
+                <div class="card" id="jsonViewerCard" style="display: none;">
                     <div class="card-header">
                         <strong>Raw JSON</strong>
                     </div>
@@ -728,7 +735,6 @@
                 </div>
             </div>
             <div class="card-row">
-
                 <div class="card" id="nutritionCard">
                     <div class="card-header">Nutrition Summary</div>
                     <div class="card-body">
@@ -739,19 +745,18 @@
                     </div>
                 </div>
 
-                <div class="card" id="graphCard" style="display: none;">
+                <div class="card" id="graphCard">
                     <div class="card-header">
                         <strong>Calorie Trends</strong>
+                        <div class="graph-controls">
+                            <span id="dayRangeLabel">7 Days</span>
+                            <button onclick="adjustDays(-1)">−</button>
+                            <button onclick="adjustDays(1)">+</button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <canvas id="calorieGraph" width="800" height="300"></canvas>
-                        <div id="graphSummary"
-                            style="margin-top: var(--space-md); font-size: var(--space-md); color: #333; text-align: center;">
-                        </div>
-                        <div class="graph-controls">
-                            <button onclick="adjustDays(-1)">−</button>
-                            <span id="dayRangeLabel">7 Days</span>
-                            <button onclick="adjustDays(1)">+</button>
+                        <canvas id="calorieGraph"></canvas>
+                        <div id="graphSummary">
                         </div>
                     </div>
                 </div>
@@ -1113,43 +1118,6 @@
                 document.getElementById('current-time').textContent = formatted;
             }
 
-            // Update every 60 seconds
-            updateCurrentTimeDisplay();
-            setInterval(updateCurrentTimeDisplay, 60000);
-
-            foodInput.addEventListener('input', saveCurrentEntry);
-            updateDisplay();
-            renderCalendar();
-
-            window.addEventListener("resize", () => {
-                if (document.getElementById("graphCard")?.style.display !== "none") {
-                    drawCalorieGraph();
-                }
-            });
-            function handleToggle(event) {
-                const toggleId = event.target.getAttribute('data-toggle-target');
-                const target = document.getElementById(toggleId);
-                if (!target) return;
-
-                target.style.display = event.target.checked ? 'block' : 'none';
-            }
-
-            // Attach toggle handlers after the DOM is ready
-            document.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('input[type="checkbox"][data-toggle-target]')
-                    .forEach(checkbox => {
-                        checkbox.addEventListener('change', handleToggle);
-
-                        // Initialize based on checked state
-                        const targetId = checkbox.getAttribute('data-toggle-target');
-                        const target = document.getElementById(targetId);
-                        if (target) {
-                            target.style.display = checkbox.checked ? 'block' : 'none';
-                        }
-                    });
-            });
-
-
             function setupToggle(id, callback = null) {
                 const checkbox = document.getElementById(`toggle${id}Switch`);
                 const card = document.getElementById(`${id.charAt(0).toLowerCase() + id.slice(1)}Card`);
@@ -1166,11 +1134,29 @@
                     if (visible && typeof callback === 'function') callback();
                 });
             }
+
+            // Update every 60 seconds
+            updateCurrentTimeDisplay();
+            setInterval(updateCurrentTimeDisplay, 60000);
+
+            foodInput.addEventListener('input', saveCurrentEntry);
+            updateDisplay();
+            renderCalendar();
+
+            window.addEventListener("resize", () => {
+                if (document.getElementById("graphCard")?.style.display !== "none") {
+                    drawCalorieGraph();
+                }
+            });
+
             document.addEventListener('DOMContentLoaded', () => {
                 setupToggle('Entries');
                 setupToggle('Nutrition');
                 setupToggle('Graph', drawCalorieGraph);
                 setupToggle('JsonViewer', updateJsonViewer);
+                if (document.getElementById('graphCard')?.style.display !== 'none') {
+                    drawCalorieGraph();
+                }
             });
 
         </script>
