@@ -71,30 +71,13 @@
             --color-graph-selected-outline: var(--color-primary);
         }
 
-        html {
-            height: 100%;
-        }
 
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        nav {
-            margin: 0;
-            padding: 0;
-        }
 
         body {
             background: var(--color-bg);
             font-family: var(--font-base);
             color: var(--color-text-primary);
             margin: 0;
-            height: 100%;
-            overflow: hidden;
-
         }
 
         button {
@@ -130,8 +113,7 @@
         .page {
             display: flex;
             flex-direction: row;
-            flex: 1 1 auto;
-            height: 100vh;
+            flex: 1;
             min-height: 0;
             height: calc(100vh - var(--menu-height));
             gap: var(--space-md);
@@ -222,8 +204,8 @@
         .main {
             display: flex;
             flex-direction: column;
-
-            flex: 1 1 auto;
+            flex: 1;
+            height: 100%;
             min-height: 0;
             overflow-y: auto;
             background: var(--color-bg);
@@ -242,12 +224,11 @@
 
         .card-row {
             display: flex;
-            gap: var(--space-md);
-            flex: 1 1 0;
             flex-direction: row;
-            align-items: stretch;
+            flex: 1;
             min-height: 0;
-            /* ✨ enable child shrinkage */
+            gap: var(--space-md);
+            align-items: stretch;
         }
 
         .card {
@@ -263,7 +244,6 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             gap: var(--rad-sm);
             overflow: hidden;
-            /* ✅ Add this */
 
         }
 
@@ -280,12 +260,13 @@
 
         .card-body {
             display: flex;
-            flex: 1 1 auto;
+            flex: 1;
             min-height: 0;
             flex-direction: column;
             margin-bottom: 0;
             background: rgba(255, 0, 0, 0.1);
             gap: var(--space-md);
+            overflow: auto;
         }
 
         .card-footer {
@@ -296,7 +277,8 @@
         .card-body textarea {
             background: rgba(0, 255, 0, 0.1);
             display: flex;
-            flex: 1 1 auto;
+            flex: 1;
+            height: 100%;
             min-height: 0;
             resize: none;
             box-sizing: border-box;
@@ -305,6 +287,7 @@
             border-radius: var(--rad-sm);
             padding: var(--space-sm);
             font-size: var(--text-size-md);
+            overflow: auto;
         }
 
         #entriesCard {
@@ -325,9 +308,8 @@
         }
 
         #jsonViewer {
-            flex: 1 1 auto;
+            flex: 1;
             min-height: 0;
-            height: 100%;
             overflow: auto;
             font-family: monospace;
             white-space: pre-wrap;
@@ -725,7 +707,7 @@
                         <div id="calories">Estimated Calories: 0</div>
                     </div>
                 </div>
-                <div class="card" id="jsonViewerCard" style="display: none;">
+                <div class="card" id="jsonViewerCard">
                     <div class="card-header">
                         <strong>Raw JSON</strong>
                     </div>
@@ -1124,16 +1106,25 @@
 
                 if (!checkbox || !card) return;
 
-                // Initial visibility
-                card.style.display = checkbox.checked ? 'block' : 'none';
+                // Initial visibility fix (no block override)
+                if (checkbox.checked) {
+                    card.style.removeProperty('display');
+                } else {
+                    card.style.display = 'none';
+                }
 
                 // React to toggle change
                 checkbox.addEventListener('change', () => {
                     const visible = checkbox.checked;
-                    card.style.display = visible ? 'block' : 'none';
-                    if (visible && typeof callback === 'function') callback();
+                    if (visible) {
+                        card.style.removeProperty('display');
+                        if (typeof callback === 'function') callback();
+                    } else {
+                        card.style.display = 'none';
+                    }
                 });
             }
+
 
             // Update every 60 seconds
             updateCurrentTimeDisplay();
