@@ -262,6 +262,25 @@
             gap: var(--space-md);
         }
 
+        .manual-entry-header {
+            position: sticky;
+            top: 0;
+            padding: var(--space-md) 0;
+            background: var(--color-card);
+            z-index: 1;
+
+        }
+
+        #manualRowsContainer {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: var(--rad-md);
+            gap: var(--space-sm);
+            min-height: 0;
+        }
+
         .card-body {
             display: flex;
             flex: 1;
@@ -291,6 +310,22 @@
             padding: var(--space-sm);
             font-size: var(--text-size-md);
             overflow: auto;
+        }
+
+        .entry-row input {
+            padding: var(--space-sm);
+            border: 1px solid var(--color-border);
+            border-radius: var(--rad-sm);
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+        }
+
+        .entry-row .remove-btn {
+            background: none;
+            color: var(--color-text-primary);
+            font-size: var(--text-size-md);
+            border: none;
+            cursor: pointer;
         }
 
         #entriesCard {
@@ -330,9 +365,11 @@
             text-align: center;
         }
 
-        .calendar-controls-wrapper {
+        .controls-wrapper {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            position: sticky;
+            align-items: center;
             gap: var(--space-sm);
             max-width: fill;
         }
@@ -646,10 +683,8 @@
     <div class="page">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="calendar-controls-wrapper">
-                    <div class="date-controls">
-                        <button id="todayButton" onclick="goToToday()">Today</button>
-                    </div>
+                <div class="date-controls">
+                    <button id="todayButton" onclick="goToToday()">Today</button>
                 </div>
                 <div id="current-time" class="current-time-display"></div>
 
@@ -691,16 +726,32 @@
                 <div class="card" id="entriesCard">
                     <div class="card-header">
                         <strong>Food Entry</strong>
-                        <div class="calendar-controls-wrapper">
-                            <div class="date-controls">
-                                <div class="date-display" <span id="dateDisplay"></span></div>
-                                <button onclick="changeDate(-1)">Previous</button>
-                                <button onclick="changeDate(1)">Next</button>
-                            </div>
+                        <!-- Entry Mode Toggle -->
+                        <div class="date-controls">
+                            <div class="date-display" <span id="dateDisplay"></span></div>
+                            <button onclick="changeDate(-1)">Previous</button>
+                            <button onclick="changeDate(1)">Next</button>
+                        </div>
+                    </div>
+                    <div class="controls-wrapper">
+                        <div class="entry-mode-toggle">
+                            <label><input type="radio" name="entryMode" value="manual" checked> Manual</label>
+                            <label><input type="radio" name="entryMode" value="json"> JSON</label>
                         </div>
                     </div>
                     <div class="card-body">
-                        <textarea id="foodInput" placeholder='[
+
+                        <!-- Manual Entry Section -->
+                        <div id="manualEntrySection">
+                            <div class="manual-entry-header">
+                                <button onclick="addManualRow()" class="button-primary">+ Add Another Item</button>
+
+                            </div>
+                            <div id="manualRowsContainer">
+                            </div>
+                        </div>
+
+                        <textarea id="foodInput" style="display: none;" placeholder='[
   { "item": "Orange Juice", "amount": "120ml", "brand": "Tropicana", "calories": 54 },
   { "item": "Wrap", "amount": "2", "brand": "Casa Mendosa", "calories": 240 }
 ]'></textarea>
@@ -793,6 +844,11 @@
                     const checkbox = document.getElementById(`toggle${id}Switch`);
                     if (card && checkbox) checkbox.checked = card.style.display !== "none";
                 });
+
+                if (document.querySelector('input[name="entryMode"]:checked')?.value === 'manual') {
+                    loadManualEntriesForDate();
+                }
+
             }
 
             function changeCalendarYear(offset) {
@@ -873,8 +929,6 @@
                 };
                 reader.readAsText(file);
             }
-
-
 
             function updateJsonViewer() {
                 jsonViewer.textContent = JSON.stringify(logData, null, 2);
@@ -1180,6 +1234,96 @@
                 updateCardRowLayout(); // 💡 Call after initial toggle setup
 
             });
+            // Entry Mode toggle (manual ↔ JSON)
+            document.querySelectorAll('input[name="entryMode"]').forEach(input => {
+                input.addEventListener('change', () => {
+                    const manual = document.getElementById('manualEntrySection');
+                    const raw = document.getElementById('foodInput');
+                    const isManual = input.value === 'manual';
+
+                    manual.style.display = isManual ? 'block' : 'none';
+                    raw.style.display = isManual ? 'none' : 'block';
+
+                    if (isManual) loadManualEntriesForDate();
+                });
+            });
+
+            function addManualRow(data = {}, autoScroll = true) {
+                const container = document.getElementById('manualRowsContainer');
+                const row = document.createElement('div');
+                row.className = 'entry-row';
+                row.style.display = 'flex';
+                row.style.gap = '0.5rem';
+
+                row.innerHTML = `
+    <input type="text" placeholder="Item" value="${data.item || ''}" style="flex: 2;">
+    <input type="text" placeholder="Amount" value="${data.amount || ''}" style="flex: 1;">
+    <input type="text" placeholder="Brand" value="${data.brand || ''}" style="flex: 1;">
+    <input type="number" placeholder="Calories" value="${data.calories || ''}" style="width: 100px;">
+    <button class="remove-btn">🗑️</button>
+  `;
+
+                const inputs = row.querySelectorAll('input');
+                const removeBtn = row.querySelector('.remove-btn');
+
+                // Auto-save when editing
+                inputs.forEach(input => input.addEventListener('input', saveManualEntry));
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    saveManualEntry();
+                });
+
+                container.appendChild(row);
+                if (autoScroll) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            function convertManualEntriesToJson() {
+                const rows = document.querySelectorAll('.entry-row');
+                const entries = [];
+
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const item = inputs[0].value.trim();
+                    const amount = inputs[1].value.trim();
+                    const brand = inputs[2].value.trim();
+                    const calories = parseFloat(inputs[3].value.trim());
+
+                    if (item && amount && !isNaN(calories)) {
+                        entries.push({ item, amount, brand, calories });
+                    }
+                });
+
+                return entries;
+            }
+
+            function saveManualEntry() {
+                const key = formatDate(currentDate);
+                const entryArray = convertManualEntriesToJson();
+                const calories = entryArray.reduce((sum, e) => sum + (e.calories || 0), 0);
+                const entry = JSON.stringify(entryArray, null, 2);
+
+                logData[key] = { entry, calories, timestamp: new Date().toISOString() };
+                localStorage.setItem('foodLog', JSON.stringify(logData));
+                caloriesDisplay.textContent = `Estimated Calories: ${calories}`;
+                updateJsonViewer();
+            }
+
+            function loadManualEntriesForDate() {
+                const key = formatDate(currentDate);
+                const container = document.getElementById('manualRowsContainer');
+                container.innerHTML = '';
+
+                let parsed = [];
+                try {
+                    parsed = JSON.parse(logData[key]?.entry || '[]');
+                } catch {
+                    // Ignore if not valid
+                }
+
+                if (Array.isArray(parsed)) {
+                    parsed.forEach(item => addManualRow(item, false));
+                }
+            }
 
         </script>
     </div>
