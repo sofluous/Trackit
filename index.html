@@ -223,12 +223,16 @@
         }
 
         .card-row {
-            display: flex;
+            display: none;
             flex-direction: row;
             flex: 1;
             min-height: 0;
             gap: var(--space-md);
-            align-items: stretch;
+        }
+
+        .card-row.visible {
+            display: flex;
+            flex: 1;
         }
 
         .card {
@@ -263,8 +267,7 @@
             flex: 1;
             min-height: 0;
             flex-direction: column;
-            margin-bottom: 0;
-            background: rgba(255, 0, 0, 0.1);
+            margin-bottom: var(--space-md);
             gap: var(--space-md);
             overflow: auto;
         }
@@ -275,7 +278,7 @@
         }
 
         .card-body textarea {
-            background: rgba(0, 255, 0, 0.1);
+            background: var(--color-bg);
             display: flex;
             flex: 1;
             height: 100%;
@@ -313,12 +316,11 @@
             overflow: auto;
             font-family: monospace;
             white-space: pre-wrap;
-            background: #272822;
+            background: var(--color-bg);
             color: #e0e0e0;
             padding: 1rem;
             border: none;
             border-radius: var(--rad-xs);
-            margin-bottom: var(--space-md);
             font-size: var(--space-md);
         }
 
@@ -685,7 +687,7 @@
             <div class="calendar" id="calendarContainer"></div>
         </aside>
         <main class="main">
-            <div class="card-row">
+            <div class="card-row" id="topRow">
                 <div class="card" id="entriesCard">
                     <div class="card-header">
                         <strong>Food Entry</strong>
@@ -716,7 +718,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-row">
+            <div class="card-row" id="bottomRow">
                 <div class="card" id="nutritionCard">
                     <div class="card-header">Nutrition Summary</div>
                     <div class="card-body">
@@ -1106,14 +1108,14 @@
 
                 if (!checkbox || !card) return;
 
-                // Initial visibility fix (no block override)
+                // Initial visibility setup
                 if (checkbox.checked) {
-                    card.style.removeProperty('display');
+                    card.style.removeProperty('display'); // use default CSS
                 } else {
                     card.style.display = 'none';
                 }
 
-                // React to toggle change
+                // Watch for toggle changes
                 checkbox.addEventListener('change', () => {
                     const visible = checkbox.checked;
                     if (visible) {
@@ -1122,9 +1124,36 @@
                     } else {
                         card.style.display = 'none';
                     }
+
+                    // 🔁 Re-evaluate card-row layout
+                    updateCardRowLayout();
                 });
             }
 
+            function updateCardRowLayout() {
+                const topRow = document.getElementById('topRow');
+                const bottomRow = document.getElementById('bottomRow');
+
+                // Check if any children inside each row are visible
+                const topVisible = [...topRow.children].some(child => child.style.display !== 'none');
+                const bottomVisible = [...bottomRow.children].some(child => child.style.display !== 'none');
+
+                // Assign layout based on visibility
+                if (topVisible && bottomVisible) {
+                    topRow.className = 'card-row visible';
+                    bottomRow.className = 'card-row visible';
+                } else if (topVisible) {
+                    topRow.className = 'card-row visible';
+                    bottomRow.className = 'card-row'; // hidden
+                } else if (bottomVisible) {
+                    topRow.className = 'card-row'; // hidden
+                    bottomRow.className = 'card-row visible';
+                } else {
+                    // fallback — both hidden
+                    topRow.className = 'card-row';
+                    bottomRow.className = 'card-row';
+                }
+            }
 
             // Update every 60 seconds
             updateCurrentTimeDisplay();
@@ -1148,6 +1177,8 @@
                 if (document.getElementById('graphCard')?.style.display !== 'none') {
                     drawCalorieGraph();
                 }
+                updateCardRowLayout(); // 💡 Call after initial toggle setup
+
             });
 
         </script>
