@@ -21,7 +21,7 @@
             --rad-lg: 16px;
 
 
-            /* Base */
+            /* Base Greys */
             --color-bg: #1d1e22;
             --color-surface: #2a2c31;
             --color-card: #2e2f36;
@@ -29,28 +29,42 @@
             --color-sidepanel: #512bc1;
 
             /* Text */
-            --color-text-primary: #ffffff;
-            --color-text-secondary: #aaaaaa;
+            --color-text-primary: #d0d0d0;
+            --color-text-secondary: #888888;
+            --color-text-disabled: #555555;
             --color-text-inverse: #000000;
-            --text-size-sm: 0.875rem;
-            --text-size-md: 1rem;
-            --text-size-lg: 2rem;
-            --text-size-xl: 3rem;
-            --text-weight-regular: 400;
-            --text-weight-bold: 600;
-
 
             /* Accent */
             --color-primary: #a6e22e;
-            /* Blue – selected/active */
             --color-secondary: #66d9ef;
-            /* Green – highlights or positive status */
+            --color-tertiary: #e57c45;
+            --color-tertiary-bg: rgba(229, 124, 69, 0.1);
+            /* for chips or subtle fills */
+            --color-tertiary-border: #e57c45;
+
 
             /* Buttons */
             --color-btn-primary-bg: var(--color-primary);
             --color-btn-primary-text: var(--color-text-inverse);
-            --color-btn-secondary-bg: #3a3d4d;
-            --color-btn-secondary-text: var(--color-text-primary);
+            --color-btn-secondary-bg: #d0d3db;
+            --color-btn-secondary-text: var(--color-text-inverse);
+            --color-btn-disabled-bg: #2c2e34;
+            --color-btn-disabled-text: var(--color-text-disabled);
+            --color-hover-bg: #444750;
+
+            --color-scroll-thumb: var(--color-btn-secondary-bg);
+            /* #383b42 */
+            --color-scroll-thumb-hover: #50545c;
+            /* lighter for hover */
+            --color-scroll-track: transparent;
+            /* or var(--color-card) */
+
+            /* Graph / Visuals */
+            --color-graph-line: var(--color-primary);
+            --color-graph-point: var(--color-primary);
+            --color-graph-label: var(--color-text-secondary);
+            --color-graph-today: var(--color-primary);
+            --color-graph-selected-outline: var(--color-primary);
 
             /* States */
             --color-today-marker: #2c89ff;
@@ -58,17 +72,17 @@
 
             /* Typography */
             --font-base: 'Inter', sans-serif;
+            --text-size-sm: 0.875rem;
+            --text-size-md: 1rem;
+            --text-size-lg: 2rem;
+            --text-size-xl: 3rem;
+            --text-weight-regular: 400;
+            --text-weight-bold: 600;
 
+            /* Highlights */
             --color-highlight-green: #8ee38e;
             --color-highlight-blue: #7f9bff;
             --color-day-card-fill: var(--color-card);
-            /* grey fill */
-
-            --color-graph-line: var(--color-primary);
-            --color-graph-point: var(--color-primary);
-            --color-graph-label: var(--color-text-secondary);
-            --color-graph-today: var(--color-primary);
-            --color-graph-selected-outline: var(--color-primary);
         }
 
 
@@ -92,8 +106,8 @@
             filter: brightness(1.1);
         }
 
-        input[type="date"] {
-            background: var(--color-surface);
+        input {
+            background: var(--color-bg);
             border: 1px solid var(--color-border);
             color: var(--color-text-primary);
             border-radius: var(--rad-sm);
@@ -108,6 +122,29 @@
             object-fit: contain;
             flex: 1 1 auto;
             /* ✅ Allow it to grow inside card-body */
+        }
+
+        /* Base scrollbar style */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-scroll-track);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--color-scroll-thumb);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--color-scroll-thumb-hover);
+        }
+
+        ::-webkit-scrollbar-button {
+            display: none;
         }
 
         .page {
@@ -267,6 +304,8 @@
             top: 0;
             padding: var(--space-md) 0;
             background: var(--color-card);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
             z-index: 1;
 
         }
@@ -298,7 +337,7 @@
 
         .card-body textarea {
             background: var(--color-bg);
-            display: flex;
+            display: block;
             flex: 1;
             height: 100%;
             min-height: 0;
@@ -352,7 +391,7 @@
             font-family: monospace;
             white-space: pre-wrap;
             background: var(--color-bg);
-            color: #e0e0e0;
+            color: var(--color-text-primary);
             padding: 1rem;
             border: none;
             border-radius: var(--rad-xs);
@@ -361,7 +400,7 @@
 
         #graphSummary {
             font-size: var(--space-md);
-            color: #333;
+            color: var(--color-text-primary);
             text-align: center;
         }
 
@@ -434,13 +473,13 @@
 
         .sidebar-header {
             display: flex;
-            align-content: left;
+            align-items: center;
             justify-content: space-between;
         }
 
         .current-time-display {
             font-size: var(--text-size-sm);
-            color: var(--color-text-secondary);
+            color: var(--color-text-primary);
             margin-left: var(--space-sm);
             white-space: nowrap;
         }
@@ -448,7 +487,7 @@
         .sidebar-header button {
             background: none;
             border: 1px var(--color-highlight-green);
-            color: var(--color-text-primary);
+            color: var(--color-text-inverse);
             font-size: var(--text-size-md);
             cursor: pointer;
             padding: var(--space-xs) var(--space-sm);
@@ -491,7 +530,7 @@
             font-size: var(--text-size-md);
             cursor: pointer;
             background: transparent;
-            border: 1px dashed var(--color-border);
+            border: 2px dotted var(--color-border);
             box-sizing: border-box;
             min-height: 36px;
             /* ensure non-zero height for empty rows */
@@ -553,6 +592,7 @@
 
         .date-controls button {
             min-width: 80px;
+            background: var(--color-btn-secondary-bg);
         }
 
         .date-info {
@@ -587,7 +627,7 @@
         .switch-label .slider {
             width: 32px;
             height: 16px;
-            background-color: #ccc;
+            background-color: var(--color-bg);
             border-radius: var(--rad-lg);
             position: relative;
             transition: background-color 0.2s ease;
@@ -600,7 +640,7 @@
             top: 2px;
             width: 12px;
             height: 12px;
-            background-color: white;
+            background-color: var(--color-btn-secondary-bg);
             border-radius: 50%;
             transition: transform 0.2s ease;
         }
