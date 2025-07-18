@@ -96,10 +96,11 @@
 
         button {
             font-size: var(--text-size-md);
-            padding: var(--space-sm) var(--space-md);
+            padding: var(--space-sm) var(--space-sd);
             border-radius: var(--rad-sm);
             border: none;
             cursor: pointer;
+            align-items: center;
         }
 
         button:hover {
@@ -351,18 +352,176 @@
             overflow: auto;
         }
 
-        .entry-row input {
-            padding: var(--space-sm);
-            border: 1px solid var(--color-border);
+        .entry-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+            padding: var(--space-xs);
+            border: 1px solid transparent;
             border-radius: var(--rad-sm);
-            background: var(--color-surface);
+        }
+
+        .entry-wrapper.active {
+            background-color: var(--color-surface);
+        }
+
+        .entry-row {
+            display: flex;
+            gap: var(--space-sm);
+            align-items: flex-start;
+        }
+
+        .entry-row.dragging {
+            opacity: 0.6;
+            border: 1px dashed var(--color-highlight-green);
+        }
+
+        .entry-main {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: var(--space-sm);
+        }
+
+        .entry-inputs {
+            display: flex;
+            flex: 1;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .entry-inputs input {
+            flex: 1 1 150px;
+            /* allows wrapping, sets a decent min width */
+            min-width: 100px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .entry-controls {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 🔲 Calories input + toggle */
+        .calories-wrapper {
+            position: relative;
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .calories-input {
+            width: 100%;
+            padding-right: 1.5rem;
+            /* make space for icon */
+            border: 1px solid var(--color-border);
+            border-radius: var(--rad-xs);
+            background: var(--color-bg);
             color: var(--color-text-primary);
+        }
+
+        .calories-input:focus {
+            border-color: var(--color-highlight-green);
+        }
+
+        /* ⬇️ Toggle button (dropdown style) */
+        .toggle-calc-btn {
+            position: absolute;
+            right: 0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0;
+            z-index: 2;
+        }
+
+        .toggle-calc-btn:hover {
+            color: var(--color-highlight-green);
+        }
+
+        /* 🧮 Calculator panel */
+        .calorie-calculator-panel {
+            display: none;
+            flex-direction: column;
+            gap: var(--space-sm);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--rad-xs);
+            padding: var(--space-sm);
+            font-size: var(--text-size-sm);
+            border-color: var(--color-highlight-green);
+        }
+
+        .calc-expression {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: var(--space-xs);
+            flex-wrap: wrap;
+            justify-content: right;
+
+        }
+
+        .calc-expression input,
+        .calc-expression select {
+            width: 5rem;
+            padding: var(--space-sm);
+            font-size: var(--text-size-sm);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--rad-xs);
+            color: var(--color-text-primary);
+        }
+
+        .calc-expression span {
+            color: var(--color-text-secondary);
+            font-weight: bold;
+        }
+
+        .calc-result-symbol {
+            font-size: 1.25rem;
+            color: var(--color-highlight-green);
+            margin-left: var(--space-sm);
+        }
+
+        .calc-info {
+            font-size: 1rem;
+            color: var(--color-highlight-blue);
+            margin-right: var(--space-xs);
+        }
+
+
+
+
+        .drag-handle {
+            cursor: grab;
+            user-select: none;
+            padding: var(--space-xs);
+            font-size: var(--text-size-md);
+            display: flex;
+            align-items: center;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .entry-row.dragging {
+            opacity: 0.6;
+            border: 1px dashed var(--color-highlight-green);
         }
 
         .entry-row .remove-btn {
             background: none;
             color: var(--color-text-primary);
             font-size: var(--text-size-md);
+            align-content: center;
             border: none;
             cursor: pointer;
         }
@@ -374,9 +533,8 @@
         }
 
         .date-display {
-            color: var(--color-highlight-green);
+            color: var(--color-text-primary);
             font-size: var(--text-size-lg);
-            margin: 0 var(--space-md);
         }
 
         #calories {
@@ -676,6 +834,29 @@
         #control-scroll::-webkit-scrollbar-thumb:hover {
             background-color: rgba(255, 255, 255, 0.4);
         }
+
+        .tooltip {
+            position: fixed;
+            z-index: 9999;
+            background: var(--color-surface);
+            color: var(--color-text-secondary);
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--rad-sm);
+            font-size: var(--text-size-sm);
+            max-width: 250px;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-0.5rem);
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+
+        }
     </style>
 </head>
 
@@ -765,10 +946,9 @@
             <div class="card-row" id="topRow">
                 <div class="card" id="entriesCard">
                     <div class="card-header">
-                        <strong>Food Entry</strong>
+                        <div class="date-display" <strong>Entry: </strong><span id="dateDisplay"></span></div>
                         <!-- Entry Mode Toggle -->
                         <div class="date-controls">
-                            <div class="date-display" <span id="dateDisplay"></span></div>
                             <button onclick="changeDate(-1)">Previous</button>
                             <button onclick="changeDate(1)">Next</button>
                         </div>
@@ -837,6 +1017,8 @@
                 </div>
             </div>
         </main>
+        <div id="tooltip" class="tooltip" role="tooltip"></div>
+
         <script>
             const foodInput = document.getElementById('foodInput');
             const caloriesDisplay = document.getElementById('calories');
@@ -867,13 +1049,20 @@
             function formatDate(date) {
                 return date.toISOString().split('T')[0];
             }
+            function formatDateDisplay(date) {
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                return `${yyyy}/${mm}/${dd}`; // → "2025/07/16"
+            }
+
 
             function updateDisplay() {
 
                 const key = formatDate(currentDate);
                 const today = formatDate(new Date());
 
-                dateDisplay.textContent = key;
+                dateDisplay.textContent = formatDateDisplay(currentDate); // for user-facing view
                 foodInput.value = logData[key]?.entry || '';
                 caloriesDisplay.textContent = `Estimated Calories: ${logData[key]?.calories || 0}`;
                 updateJsonViewer();
@@ -1290,32 +1479,185 @@
 
             function addManualRow(data = {}, autoScroll = true) {
                 const container = document.getElementById('manualRowsContainer');
+
+                // === WRAPPER ===
+                const wrapper = document.createElement('div');
+                wrapper.className = 'entry-wrapper';
+
+                // === ROW ===
                 const row = document.createElement('div');
                 row.className = 'entry-row';
-                row.style.display = 'flex';
-                row.style.gap = '0.5rem';
 
-                row.innerHTML = `
-    <input type="text" placeholder="Item" value="${data.item || ''}" style="flex: 2;">
-    <input type="text" placeholder="Amount" value="${data.amount || ''}" style="flex: 1;">
-    <input type="text" placeholder="Brand" value="${data.brand || ''}" style="flex: 1;">
-    <input type="number" placeholder="Calories" value="${data.calories || ''}" style="width: 100px;">
-    <button class="remove-btn">🗑️</button>
-  `;
+                // === Drag Handle ===
+                const handle = document.createElement('div');
+                handle.className = 'drag-handle';
+                handle.textContent = '🟰';
+                handle.setAttribute('draggable', 'true');
+                handle.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', '');
+                    row.classList.add('dragging');
+                });
+                handle.addEventListener('dragend', () => row.classList.remove('dragging'));
+                row.appendChild(handle);
 
-                const inputs = row.querySelectorAll('input');
-                const removeBtn = row.querySelector('.remove-btn');
+                // === Main Content Column ===
+                const main = document.createElement('div');
+                main.className = 'entry-main';
 
-                // Auto-save when editing
-                inputs.forEach(input => input.addEventListener('input', saveManualEntry));
+                const inputsDiv = document.createElement('div');
+                inputsDiv.className = 'entry-inputs';
+
+                const itemInput = document.createElement('input');
+                itemInput.type = 'text';
+                itemInput.placeholder = 'Item';
+                itemInput.value = data.item || '';
+
+                const amountInput = document.createElement('input');
+                amountInput.type = 'text';
+                amountInput.placeholder = 'Amount';
+                amountInput.value = data.amount || '';
+
+                const brandInput = document.createElement('input');
+                brandInput.type = 'text';
+                brandInput.placeholder = 'Brand';
+                brandInput.value = data.brand || '';
+
+                // === Calories Field with Inline Icon ===
+                const calorieWrapper = document.createElement('div');
+                calorieWrapper.className = 'calories-wrapper';
+
+                const caloriesInput = document.createElement('input');
+                caloriesInput.type = 'number';
+                caloriesInput.placeholder = 'Calories';
+                caloriesInput.className = 'calories-input';
+                caloriesInput.value = data.calories || '';
+
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'toggle-calc-btn';
+                toggleBtn.type = 'button';
+                toggleBtn.innerText = '▼';
+
+                calorieWrapper.appendChild(caloriesInput);
+                calorieWrapper.appendChild(toggleBtn);
+
+                inputsDiv.appendChild(itemInput);
+                inputsDiv.appendChild(amountInput);
+                inputsDiv.appendChild(brandInput);
+                inputsDiv.appendChild(calorieWrapper);
+
+                main.appendChild(inputsDiv);
+
+                // === Calculator Panel (inside .entry-main) ===
+                const calculatorPanel = document.createElement('div');
+                calculatorPanel.className = 'calorie-calculator-panel';
+                calculatorPanel.style.display = 'none';
+                calculatorPanel.innerHTML = `
+  <div class="calc-expression">
+    <span class="calc-info" data-tooltip="Calories per unit divided by quantity, multiplied by amount eaten">ⓘ</span>
+    <input type="number" class="label-calories" placeholder="Calories" />
+    <span>/</span>
+    <input type="number" class="label-amount" placeholder="Qty" />
+    <select class="label-unit">
+      <option value="g">g</option>
+      <option value="ml">ml</option>
+      <option value="serving">serving</option>
+      <option value="container">container</option>
+    </select>
+    <span>×</span>
+    <input type="number" class="calculator-amount" placeholder="Amount" />
+    <span class="calc-result-symbol">↵</span>
+  </div>
+`;
+
+                main.appendChild(calculatorPanel);
+                row.appendChild(main);
+
+                // === Trash Icon ===
+                const controlsDiv = document.createElement('div');
+                controlsDiv.className = 'entry-controls';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerHTML = '🗑️';
                 removeBtn.addEventListener('click', () => {
-                    row.remove();
+                    wrapper.remove();
                     saveManualEntry();
                 });
+                controlsDiv.appendChild(removeBtn);
+                row.appendChild(controlsDiv);
 
-                container.appendChild(row);
-                if (autoScroll) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // === Toggle calculator ===
+                toggleBtn.addEventListener('click', () => {
+                    const isOpen = calculatorPanel.style.display === 'flex';
+                    calculatorPanel.style.display = isOpen ? 'none' : 'flex';
+                    toggleBtn.textContent = isOpen ? '▼' : '✕';
+                    wrapper.classList.toggle('active', !isOpen);
+                    caloriesInput.classList.toggle('active', !isOpen);
+                });
+
+                // === Live calculation ===
+                function recalculateCalories() {
+                    const labelCals = parseFloat(calculatorPanel.querySelector('.label-calories').value);
+                    const labelQty = parseFloat(calculatorPanel.querySelector('.label-amount').value);
+                    let amount = parseFloat(amountInput.value);
+                    const fallback = calculatorPanel.querySelector('.calculator-amount');
+
+                    if (isNaN(amount)) {
+                        amount = parseFloat(fallback.value);
+                        if (!isNaN(amount)) amountInput.value = amount;
+                    } else {
+                        fallback.disabled = true;
+                    }
+
+                    if (!isNaN(labelCals) && !isNaN(labelQty) && labelQty > 0 && !isNaN(amount)) {
+                        const result = Math.round((labelCals / labelQty) * amount);
+                        caloriesInput.value = result;
+                        caloriesInput.dispatchEvent(new Event('input'));
+                    }
+                }
+
+                calculatorPanel.querySelectorAll('input, select').forEach(el =>
+                    el.addEventListener('input', recalculateCalories)
+                );
+                amountInput.addEventListener('input', recalculateCalories);
+
+                // === Save on input ===
+                [itemInput, amountInput, brandInput, caloriesInput].forEach(input =>
+                    input.addEventListener('input', saveManualEntry)
+                );
+
+                // === Final assembly ===
+                wrapper.appendChild(row);
+                container.appendChild(wrapper);
+
+                // === Drag support ===
+                if (!container.hasDropListeners) {
+                    container.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        const dragging = container.querySelector('.dragging');
+                        const siblings = [...container.querySelectorAll('.entry-row:not(.dragging)')];
+
+                        const after = siblings.find(sibling => {
+                            const rect = sibling.getBoundingClientRect();
+                            return e.clientY < rect.top + rect.height / 2;
+                        });
+
+                        if (after) {
+                            container.insertBefore(dragging.parentElement, after.parentElement);
+                        } else {
+                            container.appendChild(dragging.parentElement);
+                        }
+                    });
+                    container.hasDropListeners = true;
+                }
+
+                if (autoScroll) {
+                    wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
+
+
 
             function convertManualEntriesToJson() {
                 const rows = document.querySelectorAll('.entry-row');
@@ -1364,6 +1706,30 @@
                     parsed.forEach(item => addManualRow(item, false));
                 }
             }
+            const tooltipEl = document.getElementById('tooltip');
+            let tooltipTimer = null;
+
+            document.addEventListener('mouseover', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target) {
+                    const text = target.getAttribute('data-tooltip');
+                    tooltipTimer = setTimeout(() => {
+                        tooltipEl.textContent = text;
+                        tooltipEl.classList.add('visible');
+
+                        const rect = target.getBoundingClientRect();
+                        tooltipEl.style.top = `${rect.bottom + 6 + window.scrollY}px`;
+                        tooltipEl.style.left = `${rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2}px`;
+                    }, 500); // Delay in ms
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                if (tooltipTimer) clearTimeout(tooltipTimer);
+                tooltipTimer = null;
+                tooltipEl.classList.remove('visible');
+            });
+
 
         </script>
     </div>
