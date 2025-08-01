@@ -835,6 +835,18 @@
             background-color: rgba(255, 255, 255, 0.4);
         }
 
+        /* Hide number input spinners (Chrome, Safari, Edge) */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Hide number input spinners (Firefox) */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
         .tooltip {
             position: fixed;
             z-index: 9999;
@@ -1020,6 +1032,17 @@
         <div id="tooltip" class="tooltip" role="tooltip"></div>
 
         <script>
+
+            const tooltipRegistry = {
+                calculation: "Calories per unit ÷ quantity × amount eaten.",
+                amount: "Amount you consumed (e.g. 150g, 2 cups, 1 slice).",
+                brand: "Optional brand or product name for reference.",
+                item: "Name of the food item (e.g. Chicken, Bread).",
+                calories: "Total calories — can be entered directly or calculated.",
+                unit: "The unit shown on the package nutrition label (e.g. 100g, 1 bottle).",
+                basecal: "Calories listed on the label (per unit)."
+            };
+
             const foodInput = document.getElementById('foodInput');
             const caloriesDisplay = document.getElementById('calories');
             const dateDisplay = document.getElementById('dateDisplay');
@@ -1047,15 +1070,18 @@
             }
 
             function formatDate(date) {
-                return date.toISOString().split('T')[0];
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`; // for storage and lookup
             }
+
             function formatDateDisplay(date) {
                 const yyyy = date.getFullYear();
                 const mm = String(date.getMonth() + 1).padStart(2, '0');
                 const dd = String(date.getDate()).padStart(2, '0');
                 return `${yyyy}/${mm}/${dd}`; // → "2025/07/16"
             }
-
 
             function updateDisplay() {
 
@@ -1077,7 +1103,6 @@
                 if (document.querySelector('input[name="entryMode"]:checked')?.value === 'manual') {
                     loadManualEntriesForDate();
                 }
-
             }
 
             function changeCalendarYear(offset) {
@@ -1087,7 +1112,13 @@
             }
 
             function changeCalendarMonth(offset) {
-                viewedDate.setMonth(viewedDate.getMonth() + offset);
+                const year = viewedDate.getFullYear();
+                const month = viewedDate.getMonth();
+
+                // Always reset to day 1 before changing month
+                const newDate = new Date(year, month + offset, 1);
+
+                viewedDate = newDate;
                 renderCalendar();
                 updateCompassIndicators();
             }
@@ -1095,6 +1126,7 @@
 
             function changeDate(days) {
                 currentDate.setDate(currentDate.getDate() + days);
+                currentDate.setHours(0, 0, 0, 0);
                 viewedDate = new Date(currentDate);
                 updateDisplay();
                 renderCalendar();
@@ -1102,12 +1134,15 @@
             }
 
             function goToToday() {
-                currentDate = new Date();
-                viewedDate = new Date();
-                renderCalendar();
+                const now = new Date();
+                now.setHours(0, 0, 0, 0); // Normalize time
+                currentDate = new Date(now);
+                viewedDate = new Date(now);
                 updateDisplay();
+                renderCalendar();
                 updateCompassIndicators();
             }
+
 
             function saveCurrentEntry() {
                 const key = formatDate(currentDate);
@@ -1187,7 +1222,7 @@
                 for (let i = graphDays - 1; i >= 0; i--) {
                     const d = new Date(today);
                     d.setDate(today.getDate() - i);
-                    dates.push(d.toISOString().split("T")[0]);
+                    dates.push(formatDate(d));
                 }
 
                 const calories = dates.map(d => logData[d]?.calories || 0);
@@ -1277,12 +1312,10 @@
                 const yearLabel = document.getElementById('calendarYearLabel');
                 container.innerHTML = "";
 
-                const today = new Date();
+                const referenceDate = new Date(viewedDate.getFullYear(), viewedDate.getMonth(), 1);
+                referenceDate.setHours(0, 0, 0, 0); // ✅
 
-                const referenceDate = new Date();
-                referenceDate.setFullYear(viewedDate.getFullYear());
-                referenceDate.setMonth(viewedDate.getMonth());
-                referenceDate.setDate(1);
+
                 const year = referenceDate.getFullYear();
                 const month = referenceDate.getMonth();
                 const monthName = referenceDate.toLocaleString('default', { month: 'long' });
@@ -1290,9 +1323,10 @@
                 monthLabel.textContent = monthName;
                 yearLabel.textContent = year;
 
-                const start = new Date(year, month, 1);
-                const end = new Date(year, month + 1, 0);
-                const todayKey = formatDate(new Date());
+                const start = new Date(year, month, 1); start.setHours(0, 0, 0, 0); // ✅
+                const end = new Date(year, month + 1, 0); end.setHours(0, 0, 0, 0); // ✅
+                const today = new Date(); today.setHours(0, 0, 0, 0); // ✅
+                const todayKey = formatDate(today);
                 const selectedKey = formatDate(currentDate);
 
                 const startDay = start.getDay(); // Day of the week (0–6)
@@ -1306,6 +1340,8 @@
 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const date = new Date(year, month, day);
+                    date.setHours(0, 0, 0, 0); // ✅ Normalize each cell
+
                     const key = formatDate(date);
                     const div = document.createElement('div');
                     div.classList.add('calendar-day');
@@ -1325,7 +1361,7 @@
                 }
                 const todayBtn = document.getElementById('todayButton');
                 const isToday = formatDate(currentDate) === formatDate(new Date());
-                todayBtn.disabled = isToday;
+                todayBtn.disabled = formatDate(currentDate) === todayKey;
                 updateCompassIndicators();
 
             }
@@ -1554,10 +1590,10 @@
                 calculatorPanel.style.display = 'none';
                 calculatorPanel.innerHTML = `
   <div class="calc-expression">
-    <span class="calc-info" data-tooltip="Calories per unit divided by quantity, multiplied by amount eaten">ⓘ</span>
-    <input type="number" class="label-calories" placeholder="Calories" />
+    <span class="calc-info" data-tooltip-id="calculation">ⓘ</span>
+    <input type="number" class="label-calories" placeholder="Calories" data-tooltip-id="basecal" />
     <span>/</span>
-    <input type="number" class="label-amount" placeholder="Qty" />
+    <input type="number" class="label-qty" placeholder="Qty" data-tooltip-id="unit" />
     <select class="label-unit">
       <option value="g">g</option>
       <option value="ml">ml</option>
@@ -1565,7 +1601,7 @@
       <option value="container">container</option>
     </select>
     <span>×</span>
-    <input type="number" class="calculator-amount" placeholder="Amount" />
+    <input type="number" class="calculator-amount" placeholder="Amount" data-tooltip-id="amount" />
     <span class="calc-result-symbol">↵</span>
   </div>
 `;
@@ -1599,7 +1635,7 @@
                 // === Live calculation ===
                 function recalculateCalories() {
                     const labelCals = parseFloat(calculatorPanel.querySelector('.label-calories').value);
-                    const labelQty = parseFloat(calculatorPanel.querySelector('.label-amount').value);
+                    const labelQty = parseFloat(calculatorPanel.querySelector('.label-qty').value);
                     let amount = parseFloat(amountInput.value);
                     const fallback = calculatorPanel.querySelector('.calculator-amount');
 
@@ -1629,7 +1665,7 @@
 
                 // === Final assembly ===
                 wrapper.appendChild(row);
-                container.appendChild(wrapper);
+                container.insertBefore(wrapper, container.firstChild);
 
                 // === Drag support ===
                 if (!container.hasDropListeners) {
@@ -1710,18 +1746,26 @@
             let tooltipTimer = null;
 
             document.addEventListener('mouseover', (e) => {
-                const target = e.target.closest('[data-tooltip]');
-                if (target) {
-                    const text = target.getAttribute('data-tooltip');
-                    tooltipTimer = setTimeout(() => {
-                        tooltipEl.textContent = text;
-                        tooltipEl.classList.add('visible');
+                const target = e.target.closest('[data-tooltip], [data-tooltip-id]');
+                if (!target) return;
 
-                        const rect = target.getBoundingClientRect();
-                        tooltipEl.style.top = `${rect.bottom + 6 + window.scrollY}px`;
-                        tooltipEl.style.left = `${rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2}px`;
-                    }, 500); // Delay in ms
+                // Determine tooltip content
+                let text = target.getAttribute('data-tooltip');
+                const id = target.getAttribute('data-tooltip-id');
+                if (!text && id && tooltipRegistry[id]) {
+                    text = tooltipRegistry[id];
                 }
+
+                if (!text) return;
+
+                tooltipTimer = setTimeout(() => {
+                    tooltipEl.textContent = text;
+                    tooltipEl.classList.add('visible');
+
+                    const rect = target.getBoundingClientRect();
+                    tooltipEl.style.top = `${rect.bottom + 6 + window.scrollY}px`;
+                    tooltipEl.style.left = `${rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2}px`;
+                }, 500);
             });
 
             document.addEventListener('mouseout', (e) => {
@@ -1729,6 +1773,7 @@
                 tooltipTimer = null;
                 tooltipEl.classList.remove('visible');
             });
+
 
 
         </script>
