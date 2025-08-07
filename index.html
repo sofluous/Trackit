@@ -1052,6 +1052,54 @@
             let viewedDate = new Date(currentDate); // initially matches selected
             let logData = JSON.parse(localStorage.getItem('foodLog') || '{}');
 
+            let itemSuggestions = new Set();
+            let brandSuggestions = new Set();
+
+            function rebuildSuggestionsFromLog() {
+                itemSuggestions.clear();
+                brandSuggestions.clear();
+
+                Object.values(logData).forEach(({ entry }) => {
+                    try {
+                        const parsed = JSON.parse(entry);
+                        if (Array.isArray(parsed)) {
+                            parsed.forEach(obj => {
+                                if (obj.item) itemSuggestions.add(obj.item.trim().toLowerCase());
+                                if (obj.brand) brandSuggestions.add(obj.brand.trim().toLowerCase());
+                            });
+                        }
+                    } catch (e) {
+                        // Ignore bad JSON entries
+                    }
+                });
+            }
+
+            function attachSuggestions(input, suggestionSet) {
+                const datalistId = input.id + '-suggestions';
+                let datalist = document.getElementById(datalistId);
+
+                if (!datalist) {
+                    datalist = document.createElement('datalist');
+                    datalist.id = datalistId;
+                    document.body.appendChild(datalist);
+                    input.setAttribute('list', datalistId);
+                }
+
+                input.addEventListener('input', () => {
+                    const val = input.value.toLowerCase();
+                    datalist.innerHTML = ''; // Clear previous options
+
+                    if (!val) return;
+
+                    const matches = [...suggestionSet].filter(entry => entry.includes(val)).sort().slice(0, 10);
+                    matches.forEach(match => {
+                        const option = document.createElement('option');
+                        option.value = match;
+                        datalist.appendChild(option);
+                    });
+                });
+            }
+
             document.querySelector('.menu-button').addEventListener('click', () => {
                 const dropdown = document.querySelector('.dropdown');
                 dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
@@ -1183,6 +1231,8 @@
                         const imported = JSON.parse(e.target.result);
                         logData = imported;
                         localStorage.setItem('foodLog', JSON.stringify(logData));
+                        rebuildSuggestionsFromLog(); // ✅ Add this
+
                         updateDisplay();
                     }
                     catch (err) {
@@ -1489,6 +1539,7 @@
             });
 
             document.addEventListener('DOMContentLoaded', () => {
+                rebuildSuggestionsFromLog(); // ✅ Add this first
                 setupToggle('Entries');
                 setupToggle('Nutrition');
                 setupToggle('Graph', drawCalorieGraph);
@@ -1548,6 +1599,8 @@
                 itemInput.type = 'text';
                 itemInput.placeholder = 'Item';
                 itemInput.value = data.item || '';
+                attachSuggestions(itemInput, itemSuggestions);
+
 
                 const amountInput = document.createElement('input');
                 amountInput.type = 'text';
@@ -1558,6 +1611,7 @@
                 brandInput.type = 'text';
                 brandInput.placeholder = 'Brand';
                 brandInput.value = data.brand || '';
+                attachSuggestions(brandInput, brandSuggestions);
 
                 // === Calories Field with Inline Icon ===
                 const calorieWrapper = document.createElement('div');
@@ -1724,6 +1778,7 @@
                 localStorage.setItem('foodLog', JSON.stringify(logData));
                 caloriesDisplay.textContent = `Estimated Calories: ${calories}`;
                 updateJsonViewer();
+                rebuildSuggestionsFromLog();
             }
 
             function loadManualEntriesForDate() {
