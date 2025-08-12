@@ -96,7 +96,7 @@
 
         button {
             font-size: var(--text-size-md);
-            padding: var(--space-sm) var(--space-sd);
+            padding: var(--space-sm) var(--space-sm);
             border-radius: var(--rad-sm);
             border: none;
             cursor: pointer;
@@ -517,7 +517,7 @@
             border: 1px dashed var(--color-highlight-green);
         }
 
-        .entry-row .remove-btn {
+        .entry-row .deleteBtn {
             background: none;
             color: var(--color-text-primary);
             font-size: var(--text-size-md);
@@ -539,7 +539,7 @@
 
         #calories {
             font-weight: bold;
-            font-size: var(--text-size-md);
+            font-size: var(--text-size-lg);
         }
 
         #jsonViewer {
@@ -568,7 +568,7 @@
             position: sticky;
             align-items: center;
             gap: var(--space-sm);
-            max-width: fill;
+            max-width: 100%;
         }
 
         .date-controls {
@@ -893,21 +893,21 @@
 
         <div class="menu-toggle">
             <label class="switch-label">
-                <input type="checkbox" id="toggleNutritionSwitch" data-toggle-target="nutritionCard" unchecked />
+                <input type="checkbox" id="toggleNutritionSwitch" data-toggle-target="nutritionCard" />
                 <span class="slider"></span> Nutrition
             </label>
         </div>
 
         <div class="menu-toggle">
             <label class="switch-label">
-                <input type="checkbox" id="toggleGraphSwitch" data-toggle-target="graphCard" unchecked />
+                <input type="checkbox" id="toggleGraphSwitch" data-toggle-target="graphCard" />
                 <span class="slider"></span> Graph
             </label>
         </div>
 
         <div class="menu-toggle">
             <label class="switch-label">
-                <input type="checkbox" id="toggleJsonViewerSwitch" data-toggle-target="jsonViewerCard" unchecked />
+                <input type="checkbox" id="toggleJsonViewerSwitch" data-toggle-target="jsonViewerCard" />
                 <span class="slider"></span> Raw JSON
             </label>
         </div>
@@ -958,7 +958,10 @@
             <div class="card-row" id="topRow">
                 <div class="card" id="entriesCard">
                     <div class="card-header">
-                        <div class="date-display" <strong>Entry: </strong><span id="dateDisplay"></span></div>
+                        <div class="date-display">
+                            <strong>Entry: </strong>
+                            <span id="dateDisplay"></span>
+                        </div>
                         <!-- Entry Mode Toggle -->
                         <div class="date-controls">
                             <button onclick="changeDate(-1)">Previous</button>
@@ -976,8 +979,8 @@
                         <!-- Manual Entry Section -->
                         <div id="manualEntrySection">
                             <div class="manual-entry-header">
-                                <button onclick="addManualRow()" class="button-primary">+ Add Another Item</button>
-
+                                <div id="newItemRow" class="entry-wrapper"></div>
+                                <button id="undoDeleteBtn" style="display:none;">Undo Delete</button>
                             </div>
                             <div id="manualRowsContainer">
                             </div>
@@ -1032,7 +1035,6 @@
         <div id="tooltip" class="tooltip" role="tooltip"></div>
 
         <script>
-
             const tooltipRegistry = {
                 calculation: "Calories per unit ÷ quantity × amount eaten.",
                 amount: "Amount you consumed (e.g. 150g, 2 cups, 1 slice).",
@@ -1043,6 +1045,10 @@
                 basecal: "Calories listed on the label (per unit)."
             };
 
+            function uid() {
+                return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+            }
+
             const foodInput = document.getElementById('foodInput');
             const caloriesDisplay = document.getElementById('calories');
             const dateDisplay = document.getElementById('dateDisplay');
@@ -1051,6 +1057,10 @@
             let currentDate = new Date();
             let viewedDate = new Date(currentDate); // initially matches selected
             let logData = JSON.parse(localStorage.getItem('foodLog') || '{}');
+
+            let lastDeletedEntry = null;
+            let lastDeletedDate = null;
+            let lastDeletedIndex = null;
 
             let itemSuggestions = new Set();
             let brandSuggestions = new Set();
@@ -1075,29 +1085,53 @@
             }
 
             function attachSuggestions(input, suggestionSet) {
+                if (!input.id) input.id = 'in-' + Math.random().toString(36).slice(2, 8);
                 const datalistId = input.id + '-suggestions';
                 let datalist = document.getElementById(datalistId);
-
                 if (!datalist) {
                     datalist = document.createElement('datalist');
                     datalist.id = datalistId;
-                    document.body.appendChild(datalist);
                     input.setAttribute('list', datalistId);
+                    input.insertAdjacentElement('afterend', datalist);
                 }
-
                 input.addEventListener('input', () => {
                     const val = input.value.toLowerCase();
-                    datalist.innerHTML = ''; // Clear previous options
-
+                    datalist.innerHTML = '';
                     if (!val) return;
-
-                    const matches = [...suggestionSet].filter(entry => entry.includes(val)).sort().slice(0, 10);
-                    matches.forEach(match => {
-                        const option = document.createElement('option');
-                        option.value = match;
-                        datalist.appendChild(option);
-                    });
+                    [...suggestionSet]
+                        .filter(x => x.includes(val))
+                        .sort()
+                        .slice(0, 10)
+                        .forEach(match => {
+                            const option = document.createElement('option');
+                            option.value = match;
+                            datalist.appendChild(option);
+                        });
                 });
+            }
+
+            function ensureIdsForDate(key) {
+                let arr = [];
+                try { arr = JSON.parse(logData[key]?.entry || '[]'); } catch { }
+
+                if (!Array.isArray(arr)) arr = [];
+
+                let changed = false;
+                arr.forEach(e => {
+                    if (!e._id) { e._id = uid(); changed = true; }
+                });
+
+                if (changed) {
+                    const calories = arr.reduce((s, e) => s + (Number(e.calories) || 0), 0);
+                    logData[key] = {
+                        entry: JSON.stringify(arr, null, 2),
+                        calories,
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem('foodLog', JSON.stringify(logData));
+                }
+
+                return arr;
             }
 
             document.querySelector('.menu-button').addEventListener('click', () => {
@@ -1196,20 +1230,42 @@
                 const key = formatDate(currentDate);
                 const entry = foodInput.value;
                 const timestamp = new Date().toISOString();
-                let calories = 0;
-                try {
-                    const parsed = JSON.parse(entry);
-                    if (Array.isArray(parsed)) {
-                        calories = parsed.reduce((sum, item) => sum + (item.calories || 0), 0);
-                    }
-                } catch (e) {
-                    // Invalid JSON — calories set to 0
-                    calories = 0;
-                }
-                logData[key] = { entry, calories, timestamp };
+
+                let parsed = [];
+                try { parsed = JSON.parse(entry); } catch { /* leave parsed empty */ }
+                if (!Array.isArray(parsed)) parsed = [];
+
+                // ensure ids exist after JSON edits
+                parsed.forEach(e => { if (!e._id) e._id = uid(); });
+
+                const calories = parsed.reduce((sum, item) => sum + (Number(item.calories) || 0), 0);
+
+                logData[key] = { entry: JSON.stringify(parsed, null, 2), calories, timestamp };
                 localStorage.setItem('foodLog', JSON.stringify(logData));
                 caloriesDisplay.textContent = `Estimated Calories: ${calories}`;
                 updateJsonViewer();
+
+                // if manual mode is visible, refresh the list
+                const isManual = document.querySelector('input[name="entryMode"]:checked')?.value === 'manual';
+                if (isManual) loadManualEntriesForDate();
+            }
+
+            function persistOrder() {
+                const key = formatDate(currentDate);
+                const wrappers = [...document.querySelectorAll('#manualRowsContainer .entry-wrapper')];
+                // read the current array from storage
+                let arr = [];
+                try { arr = JSON.parse(logData[key]?.entry || '[]'); } catch { }
+                // reorder according to DOM
+                const byId = Object.fromEntries(arr.map(e => [e._id, e]));
+                const reordered = wrappers
+                    .map(w => byId[w.dataset.id])
+                    .filter(Boolean);
+                const calories = reordered.reduce((s, e) => s + (Number(e.calories) || 0), 0);
+                logData[key] = { entry: JSON.stringify(reordered, null, 2), calories, timestamp: new Date().toISOString() };
+                localStorage.setItem('foodLog', JSON.stringify(logData));
+                updateJsonViewer();
+                caloriesDisplay.textContent = `Estimated Calories: ${calories}`;
             }
 
             function exportData() {
@@ -1245,8 +1301,21 @@
             }
 
             function updateJsonViewer() {
-                jsonViewer.textContent = JSON.stringify(logData, null, 2);
+                const key = formatDate(currentDate);
+                const current = logData[key]?.entry || '';
+                jsonViewer.textContent = current;
+
+                // ✅ Try parsing JSON and syncing manual if valid
+                try {
+                    const parsed = JSON.parse(current);
+                    if (Array.isArray(parsed)) {
+                        logData[key].calories = parsed.reduce((sum, e) => sum + (e.calories || 0), 0);
+                        localStorage.setItem('foodLog', JSON.stringify(logData));
+                        loadManualEntriesForDate(); // ✅ sync manual
+                    }
+                } catch { }
             }
+
 
             let graphDays = 7;
 
@@ -1410,7 +1479,6 @@
                     container.appendChild(div);
                 }
                 const todayBtn = document.getElementById('todayButton');
-                const isToday = formatDate(currentDate) === formatDate(new Date());
                 todayBtn.disabled = formatDate(currentDate) === todayKey;
                 updateCompassIndicators();
 
@@ -1548,8 +1616,42 @@
                     drawCalorieGraph();
                 }
                 updateCardRowLayout(); // 💡 Call after initial toggle setup
-
             });
+
+            document.getElementById('undoDeleteBtn').addEventListener('click', () => {
+                if (!lastDeletedEntry || !lastDeletedDate) return;
+
+                let current = [];
+                try { current = JSON.parse(logData[lastDeletedDate]?.entry || '[]'); } catch { }
+
+                // Insert back at original index
+                if (lastDeletedIndex >= 0 && lastDeletedIndex <= current.length) {
+                    current.splice(lastDeletedIndex, 0, lastDeletedEntry);
+                } else {
+                    current.push(lastDeletedEntry);
+                }
+
+                const caloriesTotal = current.reduce((s, e) => s + (Number(e.calories) || 0), 0);
+                logData[lastDeletedDate] = {
+                    entry: JSON.stringify(current, null, 2),
+                    calories: caloriesTotal,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('foodLog', JSON.stringify(logData));
+
+                // Reset undo storage
+                lastDeletedEntry = null;
+                lastDeletedDate = null;
+                lastDeletedIndex = null;
+
+                // Hide undo button
+                document.getElementById('undoDeleteBtn').style.display = 'none';
+
+                updateJsonViewer();
+                rebuildSuggestionsFromLog();
+                loadManualEntriesForDate();
+            });
+
             // Entry Mode toggle (manual ↔ JSON)
             document.querySelectorAll('input[name="entryMode"]').forEach(input => {
                 input.addEventListener('change', () => {
@@ -1564,12 +1666,97 @@
                 });
             });
 
+            function renderNewItemInputRow() {
+                const container = document.getElementById('newItemRow');
+                container.innerHTML = ''; // Clear
+
+                const row = document.createElement('div');
+                row.className = 'entry-row';
+
+                const itemInput = document.createElement('input');
+                itemInput.placeholder = 'Item';
+                attachSuggestions(itemInput, itemSuggestions);
+
+                const amountInput = document.createElement('input');
+                amountInput.placeholder = 'Amount';
+                const brandInput = document.createElement('input');
+                brandInput.placeholder = 'Brand';
+                attachSuggestions(brandInput, brandSuggestions);
+
+                const calInput = document.createElement('input');
+                calInput.placeholder = 'Calories';
+                calInput.type = 'number';
+
+                [itemInput, amountInput, brandInput].forEach(input =>
+                    input.addEventListener('input', checkValidity)
+                );
+                calInput.addEventListener('input', checkValidity);
+
+                const saveBtn = document.createElement('button');
+                saveBtn.textContent = '➕ Save Item';
+                saveBtn.className = 'button-primary';
+                saveBtn.disabled = true;
+
+                saveBtn.addEventListener('click', () => {
+                    const item = itemInput.value.trim();
+                    const amount = amountInput.value.trim();
+                    const brand = brandInput.value.trim();
+                    const calories = parseFloat(calInput.value);
+
+                    if (!item || !amount || isNaN(calories)) return;
+
+                    const newEntry = { item, amount, brand, calories };
+                    appendManualEntry(newEntry); // ⬇️ save & render
+                    itemInput.value = '';
+                    amountInput.value = '';
+                    brandInput.value = '';
+                    calInput.value = '';
+                    saveBtn.disabled = true;
+                });
+
+                function checkValidity() {
+                    saveBtn.disabled = !(
+                        itemInput.value.trim() &&
+                        amountInput.value.trim() &&
+                        !isNaN(parseFloat(calInput.value))
+                    );
+                }
+
+                row.append(itemInput, amountInput, brandInput, calInput, saveBtn);
+                container.appendChild(row);
+            }
+
+            function appendManualEntry(entry) {
+                // Load current
+                const key = formatDate(currentDate);
+                let current = [];
+                try {
+                    current = JSON.parse(logData[key]?.entry || '[]');
+                } catch { }
+                const withId = { _id: uid(), ...entry };
+
+                current.unshift(withId);                        // ✅ store the id’d object
+                const calories = current.reduce((sum, e) => sum + (e.calories || 0), 0);
+
+                logData[key] = {
+                    entry: JSON.stringify(current, null, 2),
+                    calories,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('foodLog', JSON.stringify(logData));
+                updateJsonViewer();
+                caloriesDisplay.textContent = `Estimated Calories: ${calories}`;
+                rebuildSuggestionsFromLog();
+                loadManualEntriesForDate(); // re-render list
+            }
+
             function addManualRow(data = {}, autoScroll = true) {
                 const container = document.getElementById('manualRowsContainer');
 
                 // === WRAPPER ===
                 const wrapper = document.createElement('div');
                 wrapper.className = 'entry-wrapper';
+                wrapper.dataset.id = data._id || '';
 
                 // === ROW ===
                 const row = document.createElement('div');
@@ -1667,14 +1854,45 @@
                 const controlsDiv = document.createElement('div');
                 controlsDiv.className = 'entry-controls';
 
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-btn';
-                removeBtn.innerHTML = '🗑️';
-                removeBtn.addEventListener('click', () => {
-                    wrapper.remove();
-                    saveManualEntry();
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '🗑️';
+
+                deleteBtn.addEventListener('click', () => {
+                    const key = formatDate(currentDate);
+                    let current = [];
+                    try { current = JSON.parse(logData[key]?.entry || '[]'); } catch { }
+
+                    const id = wrapper.dataset.id;
+                    const index = current.findIndex(e => e._id === id);
+                    if (index === -1) return;
+
+                    // Store last deleted entry for undo
+                    lastDeletedEntry = current[index];
+                    lastDeletedDate = key;
+                    lastDeletedIndex = index;
+
+                    // Remove from list
+                    current.splice(index, 1);
+
+                    const caloriesTotal = current.reduce((s, e) => s + (Number(e.calories) || 0), 0);
+                    logData[key] = {
+                        entry: JSON.stringify(current, null, 2),
+                        calories: caloriesTotal,
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem('foodLog', JSON.stringify(logData));
+
+                    updateJsonViewer();
+                    rebuildSuggestionsFromLog();
+                    loadManualEntriesForDate();
+
+                    // Show undo button
+                    document.getElementById('undoDeleteBtn').style.display = 'inline-block';
                 });
-                controlsDiv.appendChild(removeBtn);
+
+
+
+                controlsDiv.appendChild(deleteBtn);
                 row.appendChild(controlsDiv);
 
                 // === Toggle calculator ===
@@ -1712,10 +1930,7 @@
                 );
                 amountInput.addEventListener('input', recalculateCalories);
 
-                // === Save on input ===
-                [itemInput, amountInput, brandInput, caloriesInput].forEach(input =>
-                    input.addEventListener('input', saveManualEntry)
-                );
+
 
                 // === Final assembly ===
                 wrapper.appendChild(row);
@@ -1747,18 +1962,20 @@
                 }
             }
 
-
-
             function convertManualEntriesToJson() {
-                const rows = document.querySelectorAll('.entry-row');
+                const wrappers = document.querySelectorAll('.entry-wrapper');
                 const entries = [];
 
-                rows.forEach(row => {
-                    const inputs = row.querySelectorAll('input');
-                    const item = inputs[0].value.trim();
-                    const amount = inputs[1].value.trim();
-                    const brand = inputs[2].value.trim();
-                    const calories = parseFloat(inputs[3].value.trim());
+                wrappers.forEach(wrapper => {
+                    const itemInput = wrapper.querySelector('input[placeholder="Item"]');
+                    const amountInput = wrapper.querySelector('input[placeholder="Amount"]');
+                    const brandInput = wrapper.querySelector('input[placeholder="Brand"]');
+                    const caloriesInput = wrapper.querySelector('input[placeholder="Calories"]');
+
+                    const item = itemInput?.value.trim() || '';
+                    const amount = amountInput?.value.trim() || '';
+                    const brand = brandInput?.value.trim() || '';
+                    const calories = parseFloat(caloriesInput?.value.trim());
 
                     if (item && amount && !isNaN(calories)) {
                         entries.push({ item, amount, brand, calories });
@@ -1768,35 +1985,24 @@
                 return entries;
             }
 
-            function saveManualEntry() {
-                const key = formatDate(currentDate);
-                const entryArray = convertManualEntriesToJson();
-                const calories = entryArray.reduce((sum, e) => sum + (e.calories || 0), 0);
-                const entry = JSON.stringify(entryArray, null, 2);
-
-                logData[key] = { entry, calories, timestamp: new Date().toISOString() };
-                localStorage.setItem('foodLog', JSON.stringify(logData));
-                caloriesDisplay.textContent = `Estimated Calories: ${calories}`;
-                updateJsonViewer();
-                rebuildSuggestionsFromLog();
-            }
-
             function loadManualEntriesForDate() {
                 const key = formatDate(currentDate);
                 const container = document.getElementById('manualRowsContainer');
                 container.innerHTML = '';
 
-                let parsed = [];
-                try {
-                    parsed = JSON.parse(logData[key]?.entry || '[]');
-                } catch {
-                    // Ignore if not valid
+                if (!container._wired) {             // ← gate once
+                    container.addEventListener('drop', persistOrder);
+                    container.addEventListener('dragend', persistOrder);
+                    container._wired = true;
                 }
 
-                if (Array.isArray(parsed)) {
-                    parsed.forEach(item => addManualRow(item, false));
-                }
+                const parsed = ensureIdsForDate(key); // ✅ ensure everything has _id
+
+                if (Array.isArray(parsed)) parsed.forEach(item => addManualRow(item, false));
+                renderNewItemInputRow();
             }
+
+
             const tooltipEl = document.getElementById('tooltip');
             let tooltipTimer = null;
 
@@ -1828,8 +2034,6 @@
                 tooltipTimer = null;
                 tooltipEl.classList.remove('visible');
             });
-
-
 
         </script>
     </div>
